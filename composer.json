@@ -1,0 +1,32 @@
+{
+    "name":"metabolism/rocket-kernel",
+    "version":"1.0",
+    "license": "AGPL-3.0",
+    "authors": [
+        {
+            "name": "Jérôme BARBATO",
+            "email": "jerome@metabolism.fr"
+        },
+        {
+            "name": "Paul COUDEVILLE",
+            "email": "paul@metabolism.fr"
+        }
+    ],
+    "description": "Rocket Kernel",
+    "require": {
+        "php" : ">=5.4.0",
+        "suncat/php-mobile-detect": "^2.0",
+        "twig/twig": "^1.26",
+        "twig/extensions": "^1.4",
+        "silex/silex": "^2.0",
+        "symfony/twig-bridge": "^3.1",
+        "mustangostang/spyc": "^0.6.1",
+        "dflydev/dot-access-data": "^1.0",
+        "curl/curl": "^1.5"
+    },
+    "autoload"    : {
+        "psr-4" : {
+            "Rocket\\" : "src/"
+        }
+    }
+}
