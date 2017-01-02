@@ -6,6 +6,8 @@
 
 namespace Rocket\Kernel;
 
+use Dflydev\DotAccessData\Data;
+
 trait ApplicationKernel {
 
     abstract protected function registerRoutes();
