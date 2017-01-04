@@ -6,12 +6,14 @@
 
 namespace Rocket\Kernel;
 
+use Dflydev\DotAccessData\Data;
+
 trait ApplicationKernel {
 
     abstract protected function registerRoutes();
     abstract protected function registerServicesProvider();
 
-    protected $paths, $routes;
+    protected $paths, $routes, $config;
 
 
     /**
@@ -56,23 +58,23 @@ trait ApplicationKernel {
                 $data = array_merge($data, \Spyc::YAMLLoad($file));
         }
 
-        $this['config'] = new Data($data);
+        $this->config = new Data($data);
 
-        if( $this['config']->get('environment') == "production" )
-            $this['config']->set('debug', false);
+        if( $this->config->get('environment') == "production" )
+            $this->config->set('debug', false);
     }
 
     protected function addTwigGlobal() {
 
-        $this['twig']->addGlobal('project', $this['config']->get('project', 'Rocket'));
-        $this['twig']->addGlobal('debug', $this['config']->get('debug.javascript', 0));
+        $this['twig']->addGlobal('project', $this->config->get('project', 'Rocket'));
+        $this['twig']->addGlobal('debug', $this->config->get('debug.javascript', 0));
 
         // Wordpress compatibility
         $this['twig']->addGlobal('head', '');
         $this['twig']->addGlobal('footer', '');
         $this['twig']->addGlobal('body_class', '');
 
-        $this['twig']->addGlobal('environment', $this['config']->get('environment', 'production'));
+        $this['twig']->addGlobal('environment', $this->config->get('environment', 'production'));
         $this['twig']->addGlobal('base_url', BASE_PATH);
     }
 

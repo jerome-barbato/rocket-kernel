@@ -6,11 +6,8 @@
 
 namespace Rocket\Kernel;
 
-/**
- * Class Singleton Abstract Pattern
- * @package Rocket\Model
- */
-abstract class Singleton {
+
+trait Singleton {
 
     /**
      * Instance
