@@ -15,6 +15,7 @@
     "description": "Rocket Kernel",
     "require": {
         "php" : ">=5.4.0",
+        "composer-plugin-api": "^1.0",
         "suncat/php-mobile-detect": "^2.0",
         "twig/twig": "^1.26",
         "twig/extensions": "^1.4",
@@ -23,6 +24,12 @@
         "mustangostang/spyc": "^0.6.1",
         "dflydev/dot-access-data": "^1.0",
         "curl/curl": "^1.5"
+    },
+    "require-dev": {
+        "composer/composer": "1.0.*@dev",
+        "symfony/filesystem": "~2.7",
+        "symfony/finder": "~2.7",
+        "mikey179/vfsStream": "~1"
     },
     "autoload"    : {
         "psr-4" : {

@@ -4,11 +4,11 @@
  * User: Paul Coudeville <paul@metabolism.fr>
  */
 
-namespace Rocket\Kernel;
+namespace Rocket\Application;
 
 use Dflydev\DotAccessData\Data;
 
-trait ApplicationKernel {
+trait ApplicationTrait {
 
     abstract protected function registerRoutes();
     abstract protected function registerServicesProvider();

@@ -4,10 +4,10 @@
  */
 
 
-namespace Rocket\Kernel;
+namespace Rocket\Application;
 
 
-trait Singleton {
+trait SingletonTrait {
 
     /**
      * Instance
