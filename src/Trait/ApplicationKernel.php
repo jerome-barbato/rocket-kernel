@@ -95,4 +95,6 @@ trait ApplicationKernel {
         return BASE_PATH.'/upload'.$file;
     }
 
+    public abstract static function run();
+
 }
