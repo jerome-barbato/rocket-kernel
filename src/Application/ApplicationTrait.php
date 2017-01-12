@@ -6,77 +6,90 @@
 
 namespace Rocket\Application;
 
-use Dflydev\DotAccessData\Data;
+use Dflydev\DotAccessData\Data as DotAccessData;
+use Twig_Environment;
 
 trait ApplicationTrait {
 
     abstract protected function registerRoutes();
     abstract protected function registerServicesProvider();
 
-    protected $paths, $routes, $config;
+    /** @var $config DotAccessData */
+    protected $paths, $config;
 
 
     /**
      * Define generic path for project.
-     * @param null $custom_paths
+     * @return array
      */
-    public function definePaths($custom_paths = null){
+    public function getPaths(){
 
-        if (is_null($custom_paths)) {
+        $this->paths = [
+            'config' => BASE_URI . '/config',
+            'views'  => [ BASE_URI . '/web/views', __DIR__.'/../../web/views' ],
+            'twig'   => BASE_URI . '/vendor/Twig/lib'
+        ];
 
-            $this->paths = [
-
-                'config' => BASE_URI . '/config',
-                'views'  => [ BASE_URI . '/web/views', __DIR__.'/../web/views' ],
-                'twig'   => BASE_URI . '/vendor/Twig/lib',
-                'cache'  => BASE_URI . '/var/cache',
-                'export' => BASE_URI . '/var/export'
-            ];
-        } else {
-            $this->paths = $custom_paths;
-        }
+        return $this->paths;
     }
+
 
     /**
      * YML Config loader
      * Will automatically load global and local config
-     * @param array $added_configs given values will be added after global and before local configuration files.
+     * @param array $additional_yml
+     * @return DotAccessData|mixed
+     * @internal param array $added_configs given values will be added after global and before local configuration files.
      */
-    protected function loadConfig($added_configs = []) {
+    protected function getConfig($additional_yml = []) {
 
-        $configs = ['global'];
-        array_push($configs, $added_configs);
-        array_push($configs, 'local');
+        $yml_names   = ['global'];
+        $yml_names[] = $additional_yml;
+        $yml_names[] = 'local';
 
         $data = [];
 
-        foreach ($configs as $config) {
+        foreach ($yml_names as $yml_name) {
 
-            $file = $this->paths['config'] . '/' . $config . '.yml';
+            $file = $this->paths['config'] . '/' . $yml_name . '.yml';
 
             if (file_exists($file))
                 $data = array_merge($data, \Spyc::YAMLLoad($file));
         }
 
-        $this->config = new Data($data);
+        $config = new DotAccessData($data);
 
-        if( $this->config->get('environment') == "production" )
-            $this->config->set('debug', false);
+        if( $config->get('environment') == "production" )
+            $config->set('debug', false);
+
+        $this->config = $config;
+
+        return $this->config;
     }
 
-    protected function addTwigGlobal() {
 
-        $this['twig']->addGlobal('project', $this->config->get('project', 'Rocket'));
-        $this['twig']->addGlobal('debug', $this->config->get('debug.javascript', 0));
+    /**
+     * Define Twig global environment variables
+     * @param $twig Twig_Environment
+     * @return mixed
+     */
+    protected function addTwigGlobal($twig) {
+
+        $twig->addGlobal('project', $this->config->get('project', 'Rocket'));
+        $twig->addGlobal('debug', $this->config->get('debug.javascript', 0));
+        $twig->addGlobal('options', $this->config->get('options'));
 
         // Wordpress compatibility
-        $this['twig']->addGlobal('head', '');
-        $this['twig']->addGlobal('footer', '');
-        $this['twig']->addGlobal('body_class', '');
+        $twig->addGlobal('head', '');
+        $twig->addGlobal('footer', '');
+        $twig->addGlobal('body_class', '');
 
-        $this['twig']->addGlobal('environment', $this->config->get('environment', 'production'));
-        $this['twig']->addGlobal('base_url', BASE_PATH);
+        $twig->addGlobal('environment', $this->config->get('environment', 'production'));
+        $twig->addGlobal('base_url', BASE_PATH);
+
+        return $twig;
     }
+
 
     /**
      * Return asset url like in TWIG
@@ -95,6 +108,10 @@ trait ApplicationTrait {
         return BASE_PATH.'/upload'.$file;
     }
 
-    public abstract static function run();
-
+    /**
+     * Rely on framework
+     */
+    public static function run(){
+        new \Customer\Application();
+    }
 }
