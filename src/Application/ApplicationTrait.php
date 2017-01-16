@@ -12,7 +12,7 @@ use Twig_Environment;
 trait ApplicationTrait {
 
     abstract protected function registerRoutes();
-    abstract protected function registerServicesProvider();
+    protected function registerServicesProvider(){}
 
     /** @var $config DotAccessData */
     protected $paths, $config;
