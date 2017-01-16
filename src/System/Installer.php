@@ -99,7 +99,7 @@ class Installer
      */
     public function installAssets() {
         $root_path      = getcwd();
-        $builder_path   = getcwd() . DIRECTORY_SEPARATOR . "src/asset/builder";
+        $builder_path   = getcwd() . DIRECTORY_SEPARATOR . "app/src/builder";
 
         if (is_dir($builder_path)) {
             $this->io->write('  Installing Assets...');
