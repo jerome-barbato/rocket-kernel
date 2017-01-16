@@ -25,7 +25,7 @@ trait ApplicationTrait {
     public function getPaths(){
 
         $this->paths = [
-            'config' => BASE_URI . '/config',
+            'config' => BASE_URI . '/app/config',
             'views'  => [ BASE_URI . '/web/views', __DIR__.'/../../web/views' ],
             'twig'   => BASE_URI . '/vendor/Twig/lib'
         ];
