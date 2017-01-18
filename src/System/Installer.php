@@ -102,7 +102,7 @@ class Installer
         $builder_path   = getcwd() . DIRECTORY_SEPARATOR . "app/src/builder";
 
         if (is_dir($builder_path)) {
-            $this->io->write('  Installing Assets...');
+            $this->io->write('  Installing Builder...');
             $this->io->write(sprintf('  Moving to <comment>%s</comment>.', $builder_path));
             chdir($builder_path);
             if (is_dir('node_modules')) {

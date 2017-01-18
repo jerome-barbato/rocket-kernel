@@ -15,7 +15,7 @@ trait ApplicationTrait {
     protected function registerServicesProvider(){}
 
     /** @var $config DotAccessData */
-    protected $paths, $config;
+    public $paths, $config;
 
 
     /**
@@ -25,9 +25,8 @@ trait ApplicationTrait {
     public function getPaths(){
 
         $this->paths = [
-            'config' => BASE_URI . '/config',
-            'views'  => [ BASE_URI . '/web/views', __DIR__.'/../../web/views' ],
-            'twig'   => BASE_URI . '/vendor/Twig/lib'
+            'config' => BASE_URI . '/app/config',
+            'views'  => BASE_URI . '/app/views'
         ];
 
         return $this->paths;
@@ -48,7 +47,6 @@ trait ApplicationTrait {
         $yml_names[] = 'local';
 
         $data = [];
-
         foreach ($yml_names as $yml_name) {
 
             $file = $this->paths['config'] . '/' . $yml_name . '.yml';
@@ -65,29 +63,6 @@ trait ApplicationTrait {
         $this->config = $config;
 
         return $this->config;
-    }
-
-
-    /**
-     * Define Twig global environment variables
-     * @param $twig Twig_Environment
-     * @return mixed
-     */
-    protected function addTwigGlobal($twig) {
-
-        $twig->addGlobal('project', $this->config->get('project', 'Rocket'));
-        $twig->addGlobal('debug', $this->config->get('debug.javascript', 0));
-        $twig->addGlobal('options', $this->config->get('options'));
-
-        // Wordpress compatibility
-        $twig->addGlobal('head', '');
-        $twig->addGlobal('footer', '');
-        $twig->addGlobal('body_class', '');
-
-        $twig->addGlobal('environment', $this->config->get('environment', 'production'));
-        $twig->addGlobal('base_url', BASE_PATH);
-
-        return $twig;
     }
 
 
@@ -111,7 +86,7 @@ trait ApplicationTrait {
     /**
      * Rely on framework
      */
-    public static function run(){
+    public static function load(){
         new \Customer\Application();
     }
 }
