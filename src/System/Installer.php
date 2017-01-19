@@ -47,14 +47,35 @@ class Installer
             chdir($builder_path);
             $options = count($args) ? '-'.$args[0]:'';
 
-            if (is_dir('node_modules'))
-            {
+            if (!is_dir('node_modules'))
+                passthru("yarn install --production");
+
                 passthru("gulp ".$options." --color=always");
             }
-            else{
+    }
 
+    /**
+     * Composer create
+     */
+    public static function create(Event $event)
+    {
+        $builder_path   = getcwd() . DIRECTORY_SEPARATOR . "app/resources/builder";
+        $args = $event->getArguments();
+
+        if (is_dir($builder_path))
+        {
+            chdir($builder_path);
+
+            if (!is_dir('node_modules'))
                 passthru("yarn install --production");
-                passthru("gulp ".$options." --color=always");
+
+            if( count($args) > 1){
+
+                $type = $args[0];
+                array_shift($args);
+
+                foreach ($args as $arg)
+                    passthru("gulp create --".$type." ".$arg."  --color=always");
             }
         }
     }
