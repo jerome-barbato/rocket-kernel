@@ -106,9 +106,9 @@ class Installer
             $this->io->write(sprintf('  Moving to <comment>%s</comment>.', $builder_path));
             chdir($builder_path);
             if (is_dir('node_modules')) {
-                passthru("npm update --production");
+                passthru("yarn upgrade --production");
             } else {
-                passthru("npm install --production");
+                passthru("yarn install --production");
             }
             passthru("gulp -p --color=always");
         }

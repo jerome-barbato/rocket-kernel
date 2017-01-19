@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+# 1.0.2 - 2017-01-19
+### Changed
+* Replaced npm by yarn
+
 ## 1.0.1 - 2017-01-11 ##
 Merging Rocket Tools to project
 ### Added
