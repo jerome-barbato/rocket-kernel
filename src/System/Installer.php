@@ -20,7 +20,8 @@ class Installer
     /**
      * Composer initializer
      */
-    public static function init(Event $event) {
+    public static function init(Event $event)
+    {
         $installer = Installer::getInstance($event);
 
         $installer->createFolders();
@@ -30,6 +31,31 @@ class Installer
         $dev_dependencies = $event->getComposer()->getPackage()->getDevRequires();
         if (array_key_exists("metabolism/rocket-builder", $dev_dependencies) && is_dir("vendor/metabolism/rocket-builder") ) {
             $installer->installAssets();
+        }
+    }
+
+    /**
+     * Composer initializer
+     */
+    public static function build(Event $event)
+    {
+        $builder_path   = getcwd() . DIRECTORY_SEPARATOR . "app/resources/builder";
+        $args = $event->getArguments();
+
+        if (is_dir($builder_path))
+        {
+            chdir($builder_path);
+            $options = count($args) ? '-'.$args[0]:'';
+
+            if (is_dir('node_modules'))
+            {
+                passthru("gulp ".$options." --color=always");
+            }
+            else{
+
+                passthru("yarn install --production");
+                passthru("gulp ".$options." --color=always");
+            }
         }
     }
 
@@ -45,7 +71,8 @@ class Installer
         return self::$instance;
     }
 
-    public function __construct(Event $event) {
+    public function __construct(Event $event)
+    {
         $this->files = new Files();
         $this->symlinks = new Symlink();
         $this->event = $event;
@@ -73,8 +100,8 @@ class Installer
     /**
      * Creating importants files for next steps
      */
-    public function createFolders() {
-
+    public function createFolders()
+    {
         // Creating missing folders
         $this->getFiles()->create($this->event);
 
@@ -88,8 +115,8 @@ class Installer
     /**
      * Removing files
      */
-    public function clean() {
-
+    public function clean()
+    {
         // Removing temporary files
         $this->getFiles()->remove($this->event);
     }
@@ -97,19 +124,25 @@ class Installer
     /**
      * Start Rocket-Builder NPM dependencies installation
      */
-    public function installAssets() {
-        $root_path      = getcwd();
+    public function installAssets()
+    {
         $builder_path   = getcwd() . DIRECTORY_SEPARATOR . "app/resources/builder";
 
-        if (is_dir($builder_path)) {
+        if (is_dir($builder_path))
+        {
             $this->io->write('  Installing Builder...');
             $this->io->write(sprintf('  Moving to <comment>%s</comment>.', $builder_path));
             chdir($builder_path);
-            if (is_dir('node_modules')) {
+
+            if (is_dir('node_modules'))
+            {
                 passthru("yarn upgrade --production");
-            } else {
+            }
+            else
+            {
                 passthru("yarn install --production");
             }
+
             passthru("gulp -p --color=always");
         }
     }
