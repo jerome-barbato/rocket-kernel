@@ -45,16 +45,37 @@ class Installer
         if (is_dir($builder_path))
         {
             chdir($builder_path);
-            $options = count($args) ? '-'.$args[0]:'';
+            $options = count($args) ? $args[0]:'';
 
-            if (is_dir('node_modules'))
-            {
+            if (!is_dir('node_modules'))
+                passthru("yarn install --production");
+
                 passthru("gulp ".$options." --color=always");
             }
-            else{
+    }
 
+    /**
+     * Composer create
+     */
+    public static function create(Event $event)
+    {
+        $builder_path   = getcwd() . DIRECTORY_SEPARATOR . "app/resources/builder";
+        $args = $event->getArguments();
+
+        if (is_dir($builder_path))
+        {
+            chdir($builder_path);
+
+            if (!is_dir('node_modules'))
                 passthru("yarn install --production");
-                passthru("gulp ".$options." --color=always");
+
+            if( count($args) > 1){
+
+                $type = $args[0];
+                array_shift($args);
+
+                foreach ($args as $arg)
+                    passthru("gulp create --".$type." ".$arg."  --color=always");
             }
         }
     }
@@ -103,7 +124,7 @@ class Installer
     public function createFolders()
     {
         // Creating missing folders
-        $this->getFiles()->create($this->event);
+        $this->getFiles()->createFolder($this->event);
 
         // Symlinking
         $this->getSymlinks()->create($this->event);

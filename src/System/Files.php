@@ -9,6 +9,20 @@ use Composer\Util\Filesystem;
 
 class Files
 {
+    private static $instance;
+
+    /**
+     * Singleton instance retriever
+     * @return Files
+     */
+    public static function getInstance(Event $event)
+    {
+        if (is_null(self::$instance)) {
+            self::$instance = new Files($event);
+        }
+        return self::$instance;
+    }
+
     /**
      * @param Event $event
      */
@@ -150,7 +164,7 @@ class Files
     /**
      * @param Event $event
      */
-    public function create(Event $event)
+    public function createFolder(Event $event)
     {
         $files = $this->get($event, 'create-folder');
 
@@ -194,6 +208,72 @@ class Files
             }
         }
     }
+
+
+    /**
+     * Extract archive
+     */
+    public static function extract(Event $event) {
+
+        $app_path = getcwd() . DIRECTORY_SEPARATOR . "app";
+        $files = Files::getInstance($event);
+
+        $args = $event->getArguments();
+
+        if( !count($args) ){
+
+            $files->io->write('  No arguments specified');
+            return;
+        }
+
+        $filename = $app_path.'/backup/'.$args[0];
+
+        if (file_exists($filename)){
+
+            $files->io->write('  Extracting File...');
+            passthru("tar -zxvf ".$filename." ".$args[1]);
+            $files->io->write('  Extraction complete');
+        }
+        else{
+
+            $files->io->write('  '.$filename.' does not exists');
+        }
+    }
+
+
+    /**
+     * Create archive
+     */
+    public static function compress(Event $event) {
+
+        $files = Files::getInstance($event);
+
+        $args = $event->getArguments();
+
+        if( !count($args) ){
+
+            $files->io->write('  No arguments specified');
+            return;
+        }
+
+        $app_path = getcwd() . DIRECTORY_SEPARATOR . "app";
+        $folder   = getcwd() . DIRECTORY_SEPARATOR . $args[0];
+
+        $archive  = explode('/', $args[0]);
+        $archive  = $app_path.'/backup/'.end($archive).'.tar.gz';
+
+        if (is_dir($folder)){
+
+            $files->io->write('  Compressing Folder...');
+            passthru("tar -zcvf ".$archive." ".$folder);
+            $files->io->write('  Compression complete');
+        }
+        else{
+
+            $files->io->write('  '.$folder.' does not exists');
+        }
+    }
+
 
     protected function get(Event $event, $id)
     {
