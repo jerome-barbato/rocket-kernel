@@ -9,7 +9,8 @@ use Composer\Script\Event;
 
 /**
  * Class Installer
- * @package Rocket\Tools
+ *
+ * @package Rocket\System
  */
 class Installer
 {
@@ -19,11 +20,13 @@ class Installer
 
     /**
      * Composer initializer
+     * @param $event Event
      */
     public static function init(Event $event)
     {
         $installer = Installer::getInstance($event);
 
+        passthru("git lfs install");
         $installer->createFolders();
 
         $installer->clean();
@@ -48,7 +51,7 @@ class Installer
             $options = count($args) ? $args[0]:'';
 
             if (!is_dir('node_modules'))
-                passthru("yarn install --production");
+                passthru("yarn install --production --color=always");
 
                 passthru("gulp ".$options." --color=always");
             }

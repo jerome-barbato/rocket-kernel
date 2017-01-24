@@ -6,7 +6,11 @@
 
 namespace Rocket\Application;
 
-
+/**
+ * Class SingletonTrait
+ *
+ * @package Rocket\Application
+ */
 trait SingletonTrait {
 
     /**
@@ -29,7 +33,7 @@ trait SingletonTrait {
      *
      * @return Singleton
      */
-    public final static function getInstance() {
+    public static function getInstance() {
         if (null === static::$_instance) {
             static::$_instance = new static();
         }

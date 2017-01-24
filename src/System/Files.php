@@ -7,6 +7,13 @@ use Symfony\Component\Filesystem\Exception\IOException;
 use Composer\Script\Event;
 use Composer\Util\Filesystem;
 
+/**
+ * Class Files
+ *
+ * File Manager
+ *
+ * @package Rocket\System
+ */
 class Files
 {
     private static $instance;
@@ -24,6 +31,7 @@ class Files
     }
 
     /**
+     * File Copy
      * @param Event $event
      */
     public function copy(Event $event)
@@ -109,6 +117,7 @@ class Files
 
 
     /**
+     * Folder removal
      * @param Event $event
      */
     public function remove(Event $event)
@@ -162,6 +171,7 @@ class Files
 
 
     /**
+     * Folder Creation
      * @param Event $event
      */
     public function createFolder(Event $event)
@@ -211,7 +221,8 @@ class Files
 
 
     /**
-     * Extract archive
+     * Extract archive from app/backup folder to any given path
+     * @param Event $event
      */
     public static function extract(Event $event) {
 
@@ -242,7 +253,8 @@ class Files
 
 
     /**
-     * Create archive
+     * Directory compression and export to app/backup folder.
+     * @param Event $event
      */
     public static function compress(Event $event) {
 
@@ -275,6 +287,11 @@ class Files
     }
 
 
+    /**
+     * @param Event $event
+     * @param       $id
+     * @return array
+     */
     protected function get(Event $event, $id)
     {
         $options = $event->getComposer()->getPackage()->getExtra();

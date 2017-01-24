@@ -7,29 +7,26 @@ namespace Rocket\System;
 
 use Composer\Script\Event;
 use Dflydev\DotAccessData\Data;
+use Rocket\Application\SingletonTrait;
 
 /**
- * Class Installer
- * @package Rocket\Tools
+ * Class Database
+ * @see SingletonTrait
+ * @package Rocket\System
  */
-class Database
-{
-    private static $instance;
+class Database {
+
+    use SingletonTrait;
+
+    protected static $_instance;
     private $files, $event, $io, $config;
 
+
     /**
-     * Singleton instance retriever
-     * @return Database
+     * Database constructor.
+     *
+     * @param Event $event
      */
-    public static function getInstance(Event $event)
-    {
-        if (is_null(self::$instance)) {
-            self::$instance = new Database($event);
-        }
-        return self::$instance;
-    }
-
-
     public function __construct(Event $event) {
 
         $this->files = new Files();
@@ -40,6 +37,9 @@ class Database
     }
 
 
+    /**
+     * Retrieve configuration from app/config Yaml files
+     */
     public function loadConfig() {
 
         $data = array();

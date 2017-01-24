@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+
+# 1.0.3 - 2017-02-01
+### Added
+* Composer scripts
+    * database/import : Import sql file in mysql
+    * database/export : export to app/backup
+    * archive/extract : extract backup file to any path
+    * archive/create : tar -xvzf folder
+    * build : shortcut `cd /app/resources/builder && gulp -p`
+    * create : Assets modules creation
+* Documentation improvements
+* Git LFS Support at composer installation.
+
+
 # 1.0.2 - 2017-01-19
 ### Changed
 * Replaced npm by yarn
