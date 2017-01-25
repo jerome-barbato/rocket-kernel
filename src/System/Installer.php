@@ -6,6 +6,7 @@
 namespace Rocket\System;
 
 use Composer\Script\Event;
+use Rocket\Application\SingletonTrait;
 
 /**
  * Class Installer
@@ -14,7 +15,9 @@ use Composer\Script\Event;
  */
 class Installer
 {
-    private static $instance;
+
+    use SingletonTrait;
+
     private $files, $symlinks, $event, $io;
 
 
@@ -32,7 +35,9 @@ class Installer
         $installer->clean();
 
         $dev_dependencies = $event->getComposer()->getPackage()->getDevRequires();
+
         if (array_key_exists("metabolism/rocket-builder", $dev_dependencies) && is_dir("vendor/metabolism/rocket-builder") ) {
+
             $installer->installAssets();
         }
     }
@@ -42,7 +47,7 @@ class Installer
      */
     public static function build(Event $event)
     {
-        $builder_path   = getcwd() . DIRECTORY_SEPARATOR . "app/resources/builder";
+        $builder_path   = getcwd() . DIRECTORY_SEPARATOR . "vendor/metabolism/rocket-builder";
         $args = $event->getArguments();
 
         if (is_dir($builder_path))
@@ -53,8 +58,8 @@ class Installer
             if (!is_dir('node_modules'))
                 passthru("yarn install --production --color=always");
 
-                passthru("gulp ".$options." --color=always");
-            }
+            passthru("gulp ".$options." --color=always");
+        }
     }
 
     /**
@@ -83,21 +88,10 @@ class Installer
         }
     }
 
-    /**
-     * Singleton instance retriever
-     * @return Installer
-     */
-    public static function getInstance(Event $event)
-    {
-        if (is_null(self::$instance)) {
-            self::$instance = new Installer($event);
-        }
-        return self::$instance;
-    }
 
     public function __construct(Event $event)
     {
-        $this->files = new Files();
+        $this->files = new Files($event);
         $this->symlinks = new Symlink();
         $this->event = $event;
         $this->io = $event->getIO();

@@ -2,10 +2,11 @@
 
 namespace Rocket\System;
 
-use Symfony\Component\Finder\Finder;
-use Symfony\Component\Filesystem\Exception\IOException;
-use Composer\Script\Event;
-use Composer\Util\Filesystem;
+use Symfony\Component\Finder\Finder,
+    Symfony\Component\Filesystem\Exception\IOException;
+use Composer\Script\Event,
+    Composer\Util\Filesystem;
+use Rocket\Application\SingletonTrait;
 
 /**
  * Class Files
@@ -16,18 +17,19 @@ use Composer\Util\Filesystem;
  */
 class Files
 {
-    private static $instance;
+    use SingletonTrait;
+
+    private $event, $io;
 
     /**
-     * Singleton instance retriever
-     * @return Files
+     * Files constructor.
+     *
+     * @param Event $event
      */
-    public static function getInstance(Event $event)
-    {
-        if (is_null(self::$instance)) {
-            self::$instance = new Files($event);
-        }
-        return self::$instance;
+    public function __construct(Event $event) {
+
+        $this->event = $event;
+        $this->io = $event->getIO();
     }
 
     /**
@@ -241,8 +243,17 @@ class Files
 
         if (file_exists($filename)){
 
+            $file_info = pathinfo($filename);
+
             $files->io->write('  Extracting File...');
-            passthru("tar -zxvf ".$filename." ".$args[1]);
+
+            if( $file_info['extension'] == "zip" )
+                passthru("unzip ".$filename." -d ".$args[1]);
+            else if( $file_info['extension'] == "gz" )
+                passthru("tar -zxvf ".$filename." ".$args[1]);
+            else
+                $files->io->write('  Invalid archive format ( zip or tar.gz )');
+
             $files->io->write('  Extraction complete');
         }
         else{
@@ -277,7 +288,7 @@ class Files
         if (is_dir($folder)){
 
             $files->io->write('  Compressing Folder...');
-            passthru("tar -zcvf ".$archive." ".$folder);
+            passthru("cd ".$args[0]." && tar -zchvf ".$archive." *");
             $files->io->write('  Compression complete');
         }
         else{

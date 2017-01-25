@@ -23,8 +23,6 @@ trait SingletonTrait {
 
     /**
      * Constructor
-     *
-     * @return void
      */
     protected function __construct() {}
 
@@ -34,8 +32,17 @@ trait SingletonTrait {
      * @return Singleton
      */
     public static function getInstance() {
+
+        $numargs = func_num_args();
+
         if (null === static::$_instance) {
-            static::$_instance = new static();
+
+            if( $numargs == 1 )
+                static::$_instance = new static(func_get_arg(0));
+            elseif( $numargs == 2 )
+                static::$_instance = new static(func_get_arg(1));
+            else
+                static::$_instance = new static();
         }
 
         return static::$_instance;

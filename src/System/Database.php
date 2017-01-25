@@ -18,7 +18,6 @@ class Database {
 
     use SingletonTrait;
 
-    protected static $_instance;
     private $files, $event, $io, $config;
 
 
