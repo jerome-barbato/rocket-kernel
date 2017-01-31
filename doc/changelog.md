@@ -5,7 +5,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
-# 1.0.3 - 2017-02-01
+# 1.0.4 - 2017-01-31
+### Changed
+* Removed node modules install when using "composer install"
+### Added
+* node modules install when using "composer build"
+
+
+# 1.0.3 - 2017-01-25
 ### Added
 * Composer scripts
     * database/import : Import sql file in mysql
