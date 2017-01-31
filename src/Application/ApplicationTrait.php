@@ -9,6 +9,11 @@ namespace Rocket\Application;
 use Dflydev\DotAccessData\Data as DotAccessData;
 use Twig_Environment;
 
+/**
+ * Class ApplicationTrait
+ *
+ * @package Rocket\Application
+ */
 trait ApplicationTrait {
 
     abstract protected function registerRoutes();
@@ -84,7 +89,7 @@ trait ApplicationTrait {
     }
 
     /**
-     * Rely on framework
+     * Start Customer Application to rely framework.
      */
     public static function load(){
         new \Customer\Application();

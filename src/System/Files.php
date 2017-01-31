@@ -2,14 +2,38 @@
 
 namespace Rocket\System;
 
-use Symfony\Component\Finder\Finder;
-use Symfony\Component\Filesystem\Exception\IOException;
-use Composer\Script\Event;
-use Composer\Util\Filesystem;
+use Symfony\Component\Finder\Finder,
+    Symfony\Component\Filesystem\Exception\IOException;
+use Composer\Script\Event,
+    Composer\Util\Filesystem;
+use Rocket\Application\SingletonTrait;
 
+/**
+ * Class Files
+ *
+ * File Manager
+ *
+ * @package Rocket\System
+ */
 class Files
 {
+    use SingletonTrait;
+
+    private $event, $io;
+
     /**
+     * Files constructor.
+     *
+     * @param Event $event
+     */
+    public function __construct(Event $event) {
+
+        $this->event = $event;
+        $this->io = $event->getIO();
+    }
+
+    /**
+     * File Copy
      * @param Event $event
      */
     public function copy(Event $event)
@@ -95,6 +119,7 @@ class Files
 
 
     /**
+     * Folder removal
      * @param Event $event
      */
     public function remove(Event $event)
@@ -148,9 +173,10 @@ class Files
 
 
     /**
+     * Folder Creation
      * @param Event $event
      */
-    public function create(Event $event)
+    public function createFolder(Event $event)
     {
         $files = $this->get($event, 'create-folder');
 
@@ -195,6 +221,88 @@ class Files
         }
     }
 
+
+    /**
+     * Extract archive from app/backup folder to any given path
+     * @param Event $event
+     */
+    public static function extract(Event $event) {
+
+        $app_path = getcwd() . DIRECTORY_SEPARATOR . "app";
+        $files = Files::getInstance($event);
+
+        $args = $event->getArguments();
+
+        if( !count($args) ){
+
+            $files->io->write('  No arguments specified');
+            return;
+        }
+
+        $filename = $app_path.'/backup/'.$args[0];
+
+        if (file_exists($filename)){
+
+            $file_info = pathinfo($filename);
+
+            $files->io->write('  Extracting File...');
+
+            if( $file_info['extension'] == "zip" )
+                passthru("unzip ".$filename." -d ".$args[1]);
+            else if( $file_info['extension'] == "gz" )
+                passthru("tar -zxvf ".$filename." ".$args[1]);
+            else
+                $files->io->write('  Invalid archive format ( zip or tar.gz )');
+
+            $files->io->write('  Extraction complete');
+        }
+        else{
+
+            $files->io->write('  '.$filename.' does not exists');
+        }
+    }
+
+
+    /**
+     * Directory compression and export to app/backup folder.
+     * @param Event $event
+     */
+    public static function compress(Event $event) {
+
+        $files = Files::getInstance($event);
+
+        $args = $event->getArguments();
+
+        if( !count($args) ){
+
+            $files->io->write('  No arguments specified');
+            return;
+        }
+
+        $app_path = getcwd() . DIRECTORY_SEPARATOR . "app";
+        $folder   = getcwd() . DIRECTORY_SEPARATOR . $args[0];
+
+        $archive  = explode('/', $args[0]);
+        $archive  = $app_path.'/backup/'.end($archive).'.tar.gz';
+
+        if (is_dir($folder)){
+
+            $files->io->write('  Compressing Folder...');
+            passthru("cd ".$args[0]." && tar -zchvf ".$archive." *");
+            $files->io->write('  Compression complete');
+        }
+        else{
+
+            $files->io->write('  '.$folder.' does not exists');
+        }
+    }
+
+
+    /**
+     * @param Event $event
+     * @param       $id
+     * @return array
+     */
     protected function get(Event $event, $id)
     {
         $options = $event->getComposer()->getPackage()->getExtra();
