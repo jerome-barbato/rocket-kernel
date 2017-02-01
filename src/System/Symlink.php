@@ -63,13 +63,14 @@ class Symlink
                         );
                     }
 
-                    if( file_exists($linkPath) )
-                        $fs->unlink($linkPath);
+                    if( !file_exists($linkPath) ){
 
-                    $event->getIO()->write(sprintf("  Symlinking <comment>%s</comment> to <comment>%s</comment>", str_replace(getcwd(), '', $targetPath), str_replace(getcwd(), '', $linkPath)));
+                        $event->getIO()->write(sprintf("  Symlinking <comment>%s</comment> to <comment>%s</comment>", str_replace(getcwd(), '', $targetPath), str_replace(getcwd(), '', $linkPath)));
 
-                    $fs->ensureDirectoryExists(dirname($linkPath));
-                    $fs->relativeSymlink($targetPath, $linkPath);
+                        $fs->ensureDirectoryExists(dirname($linkPath));
+                        $fs->relativeSymlink($targetPath, $linkPath);
+
+                    }
                 }
             }
         }
