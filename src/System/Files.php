@@ -206,14 +206,14 @@ class Files
 
                         if( !is_dir($file) && !file_exists($file)){
 
-                            $permissions = intval($permissions, 8);
-                            mkdir($file, $permissions);
                             $io->write(sprintf('  Creating directory <comment>%s</comment>.', str_replace(getcwd(), '', $file)));
 
+                            $oldmask = umask(0);
+                            mkdir($file, octdec($permissions));
+                            umask($oldmask);
                         }
-
-
                     } catch (IOException $e) {
+
                         throw new \InvalidArgumentException(sprintf('<error>Could not create %s</error>', $e));
                     }
                 }

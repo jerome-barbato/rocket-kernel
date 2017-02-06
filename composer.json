@@ -14,7 +14,7 @@
     ],
     "description": "Rocket Kernel",
     "require": {
-        "php" : ">=5.4.0",
+        "php" : ">=5.5.0",
         "composer-plugin-api": "^1.0",
         "mustangostang/spyc": "^0.6.1",
         "dflydev/dot-access-data": "^1.0"

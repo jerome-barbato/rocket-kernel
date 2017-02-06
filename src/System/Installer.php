@@ -143,9 +143,9 @@ class Installer
             chdir($this->builder_path);
 
             if (is_dir('node_modules'))
-                passthru("yarn upgrade --production  --color=always");
+                passthru("yarn upgrade --production");
             else
-                passthru("yarn install --production  --color=always");
+                passthru("yarn install --production");
         }
     }
 }
