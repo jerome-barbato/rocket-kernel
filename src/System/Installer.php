@@ -31,8 +31,6 @@ class Installer
 
         passthru("git lfs install");
         $installer->createFolders();
-
-        $installer->clean();
     }
 
 
@@ -131,16 +129,6 @@ class Installer
 
         // Copying important files
         $this->getFiles()->copy($this->event);
-    }
-
-
-    /**
-     * Removing files
-     */
-    public function clean()
-    {
-        // Removing temporary files
-        $this->getFiles()->remove($this->event);
     }
 
 
