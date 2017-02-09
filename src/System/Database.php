@@ -11,7 +11,8 @@ use Rocket\Application\SingletonTrait;
 
 /**
  * Class Database
- * @see SingletonTrait
+ *
+ * @see     SingletonTrait
  * @package Rocket\System
  */
 class Database {
@@ -26,11 +27,12 @@ class Database {
      *
      * @param Event $event
      */
-    public function __construct(Event $event) {
+    public function __construct(Event $event)
+    {
 
         $this->files = new Files();
         $this->event = $event;
-        $this->io = $event->getIO();
+        $this->io    = $event->getIO();
 
         $this->loadConfig();
     }
@@ -39,59 +41,65 @@ class Database {
     /**
      * Retrieve configuration from app/config Yaml files
      */
-    public function loadConfig() {
+    public function loadConfig()
+    {
 
-        $data = array();
+        $data = [];
 
         include getcwd() . DIRECTORY_SEPARATOR . "vendor/mustangostang/spyc/Spyc.php";
 
-        $config_path   = getcwd() . DIRECTORY_SEPARATOR . "app/config";
+        $config_path = getcwd() . DIRECTORY_SEPARATOR . "app/config";
 
-        foreach (array('global', 'local') as $config) {
+        foreach ( ['global', 'local'] as $config ) {
 
             $file = $config_path . '/' . $config . '.yml';
 
-            if (file_exists($file))
-                $data = array_merge($data, \Spyc::YAMLLoad($file));
+            if ( file_exists( $file ) ) {
+                $data = array_merge( $data, \Spyc::YAMLLoad( $file ) );
+            }
         }
 
-        $this->config = new Data($data);
+        $this->config = new Data( $data );
     }
 
 
     /**
      * Import database
      */
-    public static function import(Event $event) {
+    public static function import(Event $event)
+    {
 
         $app_path = getcwd() . DIRECTORY_SEPARATOR . "app";
-        $database = Database::getInstance($event);
-        $args = $event->getArguments();
+        $database = Database::getInstance( $event );
+        $args     = $event->getArguments();
 
-        if( count($args) )
-            $filename = $app_path.'/backup/'.$args[0];
-        else
-            $filename = $app_path.'/resources/db.sql';
+        if ( count( $args ) ) {
+            $filename = $app_path . '/backup/' . $args[0];
+        }
+        else {
+            $filename = $app_path . '/resources/db.sql';
+        }
 
-        if (file_exists($filename)){
+        if ( file_exists( $filename ) ) {
 
-            $database->io->write('  Importing database...');
+            $database->io->write( '  Importing database...' );
 
-            if( count($args) == 3 ){
+            if ( count( $args ) == 3 ) {
 
-                file_put_contents($filename.'.tmp', str_replace($args[1], $args[2], file_get_contents($filename)));
-                $filename = $filename.'.tmp';
+                file_put_contents( $filename . '.tmp', str_replace( $args[1], $args[2], file_get_contents( $filename ) ) );
+                $filename = $filename . '.tmp';
             }
 
-            passthru("mysql -u ".$database->config->get('database.user')." -p".$database->config->get('database.password')." ".$database->config->get('database.name')." < ".$filename."  2>&1 | grep -v \"Warning: Using a password\"");
-            $database->io->write('  Import complete');
+            passthru( "mysql -u " . $database->config->get( 'database.user' ) . " -p" . $database->config->get( 'database.password' ) . " " . $database->config->get( 'database.name' ) . " < " . $filename . "  2>&1 | grep -v \"Warning: Using a password\"" );
+            $database->io->write( '  Import complete' );
 
-            if( count($args) == 3 )
-                unlink($filename);
+            if ( count( $args ) == 3 ) {
+                unlink( $filename );
+            }
         }
-        else{
+        else {
 
-            $database->io->write('  '.$filename.' does not exists');
+            $database->io->write( '  ' . $filename . ' does not exists' );
         }
     }
 
@@ -99,23 +107,26 @@ class Database {
     /**
      * Export database
      */
-    public static function export(Event $event) {
+    public static function export(Event $event)
+    {
 
-        $database = Database::getInstance($event);
+        $database    = Database::getInstance( $event );
         $backup_path = getcwd() . DIRECTORY_SEPARATOR . "app/backup";
-        $args = $event->getArguments();
+        $args        = $event->getArguments();
 
-        if (!is_dir($backup_path))
-            mkdir($backup_path);
+        if ( !is_dir( $backup_path ) ) {
+            mkdir( $backup_path );
+        }
 
-        $filename = $backup_path.'/'.date('Ymd').'.sql';
+        $filename = $backup_path . '/' . date( 'Ymd' ) . '.sql';
 
-        $database->io->write('  Exporting database...');
-        passthru("mysqldump -u ".$database->config->get('database.user')." -p".$database->config->get('database.password')." ".$database->config->get('database.name')." > ".$filename);
+        $database->io->write( '  Exporting database...' );
+        passthru( "mysqldump -u " . $database->config->get( 'database.user' ) . " -p" . $database->config->get( 'database.password' ) . " " . $database->config->get( 'database.name' ) . " > " . $filename );
 
-        if( count($args) == 2 )
-            file_put_contents($filename, str_replace($args[0], $args[1], file_get_contents($filename)));
+        if ( count( $args ) == 2 ) {
+            file_put_contents( $filename, str_replace( $args[0], $args[1], file_get_contents( $filename ) ) );
+        }
 
-        $database->io->write('  Exporting complete');
+        $database->io->write( '  Exporting complete' );
     }
 }
