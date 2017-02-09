@@ -34,7 +34,10 @@ trait ApplicationTrait {
     public function getPaths()
     {
 
-        $this->paths = ['config' => BASE_URI . '/app/config', 'views' => BASE_URI . '/app/views'];
+        $this->paths = [
+            'config' => BASE_URI . '/app/config',
+            'views'  => BASE_URI . '/app/views'
+        ];
 
         return $this->paths;
     }

@@ -50,7 +50,10 @@ class Database {
 
         $config_path = getcwd() . DIRECTORY_SEPARATOR . "app/config";
 
-        foreach ( ['global', 'local'] as $config ) {
+        foreach ( [
+                      'global',
+                      'local'
+                  ] as $config ) {
 
             $file = $config_path . '/' . $config . '.yml';
 
@@ -110,9 +113,9 @@ class Database {
     public static function export(Event $event)
     {
 
-        $database    = Database::getInstance( $event );
+        $database = Database::getInstance( $event );
         $backup_path = getcwd() . DIRECTORY_SEPARATOR . "app/backup";
-        $args        = $event->getArguments();
+        $args = $event->getArguments();
 
         if ( !is_dir( $backup_path ) ) {
             mkdir( $backup_path );
