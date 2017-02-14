@@ -89,7 +89,7 @@ trait ApplicationTrait {
 
         $config = new DotAccessData( $data );
 
-        if ( $config->get( 'environment' ) == "production" ) {
+        if ( $config->get( 'environment', 'production' ) == "production" ) {
             $config->set( 'debug', false );
         }
 
