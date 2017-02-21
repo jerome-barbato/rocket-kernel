@@ -6,32 +6,41 @@
 namespace Rocket\System;
 
 use Composer\Script\Event;
+use Rocket\Application\SingletonTrait;
 
 /**
  * Class Installer
- * @package Rocket\Tools
+ *
+ * @package Rocket\System
  */
-class Installer
-{
-    private static $instance;
-    private $files, $symlinks, $event, $io;
+class Installer {
 
+    use SingletonTrait;
+
+    private $files, $symlinks, $event, $io, $builder_path;
+
+    public function __construct(Event $event)
+    {
+        $this->files    = new Files( $event );
+        $this->symlinks = new Symlink();
+        $this->event    = $event;
+        $this->io       = $event->getIO();
+
+        $this->builder_path = getcwd() . DIRECTORY_SEPARATOR . "vendor/metabolism/rocket-builder";
+
+    }
 
     /**
      * Composer initializer
+     *
+     * @param $event Event
      */
     public static function init(Event $event)
     {
-        $installer = Installer::getInstance($event);
+        $installer = Installer::getInstance( $event );
 
+        passthru( "git lfs install" );
         $installer->createFolders();
-
-        $installer->clean();
-
-        $dev_dependencies = $event->getComposer()->getPackage()->getDevRequires();
-        if (array_key_exists("metabolism/rocket-builder", $dev_dependencies) && is_dir("vendor/metabolism/rocket-builder") ) {
-            $installer->installAssets();
-        }
     }
 
     /**
@@ -39,19 +48,20 @@ class Installer
      */
     public static function build(Event $event)
     {
-        $builder_path   = getcwd() . DIRECTORY_SEPARATOR . "app/resources/builder";
+        $installer = Installer::getInstance( $event );
+
         $args = $event->getArguments();
 
-        if (is_dir($builder_path))
-        {
-            chdir($builder_path);
-            $options = count($args) ? '-'.$args[0]:'';
+        if ( is_dir( $installer->builder_path ) ) {
+            chdir( $installer->builder_path );
+            $options = count( $args ) ? $args[0] : '';
 
-            if (!is_dir('node_modules'))
-                passthru("yarn install --production");
-
-                passthru("gulp ".$options." --color=always");
+            if ( !is_dir( 'node_modules' ) ) {
+                $installer->installNodeModules();
             }
+
+            passthru( "gulp " . $options . " --color=always" );
+        }
     }
 
     /**
@@ -59,45 +69,42 @@ class Installer
      */
     public static function create(Event $event)
     {
-        $builder_path   = getcwd() . DIRECTORY_SEPARATOR . "app/resources/builder";
+        $installer = Installer::getInstance( $event );
+
         $args = $event->getArguments();
 
-        if (is_dir($builder_path))
-        {
-            chdir($builder_path);
+        if ( is_dir( $installer->builder_path ) ) {
+            chdir( $installer->builder_path );
 
-            if (!is_dir('node_modules'))
-                passthru("yarn install --production");
+            if ( !is_dir( 'node_modules' ) ) {
+                $installer->installNodeModules();
+            }
 
-            if( count($args) > 1){
+            if ( count( $args ) > 1 ) {
 
                 $type = $args[0];
-                array_shift($args);
+                array_shift( $args );
 
-                foreach ($args as $arg)
-                    passthru("gulp create --".$type." ".$arg."  --color=always");
+                foreach ( $args as $arg ) {
+                    passthru( "gulp create --" . $type . " " . $arg . "  --color=always" );
+                }
             }
         }
     }
 
     /**
-     * Singleton instance retriever
-     * @return Installer
+     * Creating importants files for next steps
      */
-    public static function getInstance(Event $event)
+    public function createFolders()
     {
-        if (is_null(self::$instance)) {
-            self::$instance = new Installer($event);
-        }
-        return self::$instance;
-    }
+        // Creating missing folders
+        $this->getFiles()->createFolder( $this->event );
 
-    public function __construct(Event $event)
-    {
-        $this->files = new Files();
-        $this->symlinks = new Symlink();
-        $this->event = $event;
-        $this->io = $event->getIO();
+        // Symlinking
+        $this->getSymlinks()->create( $this->event );
+
+        // Copying important files
+        $this->getFiles()->copy( $this->event );
     }
 
     /**
@@ -119,52 +126,20 @@ class Installer
     }
 
     /**
-     * Creating importants files for next steps
-     */
-    public function createFolders()
-    {
-        // Creating missing folders
-        $this->getFiles()->create($this->event);
-
-        // Symlinking
-        $this->getSymlinks()->create($this->event);
-
-        // Copying important files
-        $this->getFiles()->copy($this->event);
-    }
-
-    /**
-     * Removing files
-     */
-    public function clean()
-    {
-        // Removing temporary files
-        $this->getFiles()->remove($this->event);
-    }
-
-    /**
      * Start Rocket-Builder NPM dependencies installation
      */
-    public function installAssets()
+    public function installNodeModules()
     {
-        $builder_path   = getcwd() . DIRECTORY_SEPARATOR . "app/resources/builder";
+        if ( is_dir( $this->builder_path ) ) {
+            $this->io->write( '  Installing node modules...' );
+            chdir( $this->builder_path );
 
-        if (is_dir($builder_path))
-        {
-            $this->io->write('  Installing Builder...');
-            $this->io->write(sprintf('  Moving to <comment>%s</comment>.', $builder_path));
-            chdir($builder_path);
-
-            if (is_dir('node_modules'))
-            {
-                passthru("yarn upgrade --production");
+            if ( is_dir( 'node_modules' ) ) {
+                passthru( "yarn upgrade --production" );
             }
-            else
-            {
-                passthru("yarn install --production");
+            else {
+                passthru( "yarn install --production" );
             }
-
-            passthru("gulp -p --color=always");
         }
     }
 }
