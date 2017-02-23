@@ -19,7 +19,14 @@ class Database {
 
     use SingletonTrait;
 
-    private $files, $event, $io, $config;
+    /** @var Files $files */
+    private $files;
+    /** @var Event $event */
+    private $event;
+    /** @var IOInterface $io */
+    private $io;
+    /** @var Data $config */
+    private $config;
 
 
     /**
@@ -30,7 +37,7 @@ class Database {
     public function __construct(Event $event)
     {
 
-        $this->files = new Files();
+        $this->files = new Files($event);
         $this->event = $event;
         $this->io    = $event->getIO();
 
@@ -52,6 +59,7 @@ class Database {
 
         foreach ( [
                       'global',
+                      'remote',
                       'local'
                   ] as $config ) {
 
@@ -65,71 +73,162 @@ class Database {
         $this->config = new Data( $data );
     }
 
+    public static function handle(Event $event)
+    {
+        /** @var Database $database */
+        $database = Database::getInstance( $event );
+        $args   = $event->getArguments();
+
+        if ( !count($args)) {
+
+            $database->io->writeError($database->getComposerDatabaseDescription());
+
+            return;
+        }
+
+        $action = $args[0];
+
+        if ($action != 'import' && $action != 'export') {
+
+            $database->io->writeError( "  Wrong action call\n".
+                "  action can be 'import' or 'export' only.".$database->getComposerDatabaseDescription());
+            return;
+        }
+
+        if ($action == 'import' && count($args) < 2) {
+
+            $database->io->writeError( "  Missing path argument\n".$database->getComposerDatabaseDescription());
+            return;
+        }
+
+        $archive_info = $args[1];
+
+        try {
+
+            $database->prepare($action, $archive_info);
+
+        } catch (\Exception $e) {
+
+            $database->io->write("  ERROR : ".$e->getMessage());
+        }
+    }
+
+    /**
+     * @param $action
+     * @param $archive_info
+     */
+    public function prepare($action, $archive_info)
+    {
+
+
+        if (!method_exists($this, $action)) {
+
+            throw new \InvalidArgumentException( $action . " function does not exist !" . $this->getComposerDatabaseDescription());
+        }
+
+        $db_infos = [];
+        // Common configuration
+        $db_infos['username']   = $this->config->get( 'database.user' );
+        $db_infos['password']   = $this->config->get( 'database.password' );
+        $db_infos['db_name']    = $this->config->get( 'database.name' );
+        $db_infos['host']       = "localhost";
+
+        $this->io->write( '  Starting '.$action.'...' );
+        $this->$action($archive_info, $db_infos);
+    }
+
+    public function withdraw($remote_cfg) {
+
+    }
 
     /**
      * Import database
      */
-    public static function import(Event $event)
+    public function import($archive_path, $db_infos)
     {
 
-        $app_path = getcwd() . DIRECTORY_SEPARATOR . "app";
-        $database = Database::getInstance( $event );
-        $args     = $event->getArguments();
-
-        if ( count( $args ) ) {
-            $filename = $app_path . '/backup/' . $args[0];
-        }
-        else {
-            $filename = $app_path . '/resources/db.sql';
+        if (!is_array($db_infos) || !isset($db_infos['username'], $db_infos['password'], $db_infos['db_name'], $db_infos['host'])) {
+            throw new \InvalidArgumentException("Database informations are not compelete.");
         }
 
-        if ( file_exists( $filename ) ) {
+        if ( file_exists( $archive_path ) ) {
 
-            $database->io->write( '  Importing database...' );
+            $confirm = $this->io->askConfirmation("  File name : ".getcwd().DIRECTORY_SEPARATOR.$archive_path."\n  Confirm import ? [y,n] ", false);
 
-            if ( count( $args ) == 3 ) {
+            if($confirm) {
 
-                file_put_contents( $filename . '.tmp', str_replace( $args[1], $args[2], file_get_contents( $filename ) ) );
-                $filename = $filename . '.tmp';
+                $file_info = pathinfo( $archive_path );
+
+                $command = "";
+
+                // extracting file content
+                if ($file_info['extension'] == 'gz') {
+                    $command .= "zcat ".$archive_path." | ";
+                }
+                $command .= "mysql -u " . $db_infos['username']. " -h " . $db_infos['host']. " --password='" . $db_infos['password']. "' " . $db_infos['db_name'];
+
+                passthru($command);
+
+                $this->io->write( "\n  Import complete." );
             }
 
-            passthru( "mysql -u " . $database->config->get( 'database.user' ) . " -p" . $database->config->get( 'database.password' ) . " " . $database->config->get( 'database.name' ) . " < " . $filename . "  2>&1 | grep -v \"Warning: Using a password\"" );
-            $database->io->write( '  Import complete' );
 
-            if ( count( $args ) == 3 ) {
-                unlink( $filename );
-            }
         }
         else {
 
-            $database->io->write( '  ' . $filename . ' does not exists' );
+            throw new \InvalidArgumentException($archive_path . ' does not exists.' );
         }
+    }
+
+
+    private function getReplace($action, $env) {
+
+        $replacements = $this->config->get( $env . '.database.replace' );
+        var_dump($env . '.database.replace');
+
+        if (isset($replacements) ) {
+
+            $command = "sed '";
+            var_dump($replacements);
+            foreach ($replacements as $replacement) {
+
+            }
+        }
+
+        $command = "sed 's,http://localhost/corporate/wp,http://www.replace.com/page/,g' sample.sql";
+        return $command;
     }
 
 
     /**
      * Export database
      */
-    public static function export(Event $event)
+    public function export($archive_name)
     {
 
-        $database = Database::getInstance( $event );
-        $backup_path = getcwd() . DIRECTORY_SEPARATOR . "app/backup";
-        $args = $event->getArguments();
+        $backup_path = getcwd() . DIRECTORY_SEPARATOR . "app/resources/db";
 
         if ( !is_dir( $backup_path ) ) {
             mkdir( $backup_path );
         }
 
-        $filename = $backup_path . '/' . date( 'Ymd' ) . '.sql';
+        $filename = $backup_path . '/' . date( 'Ymd' ) . '.sql.gz';
 
-        $database->io->write( '  Exporting database...' );
-        passthru( "mysqldump -u " . $database->config->get( 'database.user' ) . " -p" . $database->config->get( 'database.password' ) . " " . $database->config->get( 'database.name' ) . " > " . $filename );
+        $this->io->write( '  Exporting database...' );
+        passthru( "mysqldump -u " . $this->config->get( 'database.user' ) . " --password='" . $this->config->get( 'database.password' ) . "' " . $this->config->get( 'database.name' ) . " | gzip > " . $filename );
 
-        if ( count( $args ) == 2 ) {
-            file_put_contents( $filename, str_replace( $args[0], $args[1], file_get_contents( $filename ) ) );
-        }
+        $this->io->write( '  Exporting complete' );
+    }
 
-        $database->io->write( '  Exporting complete' );
+
+    public function getComposerDatabaseDescription() {
+
+        return  "\n  ----------------- \n".
+            "  COMPOSER DATABASE \n".
+            "  ----------------- \n".
+            "  composer database [action] [param]\n".
+            "           [action] : \n".
+            "             - import [path]\n".
+            "             - export [name]\n";
     }
 }
