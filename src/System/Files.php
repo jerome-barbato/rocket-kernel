@@ -456,7 +456,7 @@ class Files {
         }
 
         /** @var Database $db */
-        $db = Database::getInstance();
+        $db = Database::getInstance($this->event);
 
         if (method_exists($db, $action)) {
             $db->$action($remote_cfg);

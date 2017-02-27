@@ -4,7 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-# 1.0.5 - 2017-02-21
+# 1.1.0 - 2017-02-27
+### Added
+* Database class can now import from compressed archive.
+* File class can now perform deployment or withdrawal.
 ### Changed
 * Application environnment is now set to production by default
 * Clean function has been removed from composer install
