@@ -51,22 +51,27 @@ class Files {
 
         $filename = getcwd() . DIRECTORY_SEPARATOR . $archive;
 
-        if ( file_exists( $filename ) ) {
-
+        if ( file_exists( $filename ) )
+        {
             $file_info = pathinfo( $filename );
 
-            if ( $file_info['extension'] == "zip" ) {
+            if ( $file_info['extension'] == "zip" )
+            {
                 passthru( "unzip " . $filename . " -d " . $destination );
             }
-            else {
-                if ( $file_info['extension'] == "gz" ) {
+            else
+            {
+                if ( $file_info['extension'] == "gz" )
+                {
                     passthru( "tar -zxvf " . $filename . " " . $destination );
                 }
-                else {
+                else
+                {
                     throw new \BadMethodCallException('Invalid archive format ( zip or tar.gz )');
                 }
             }
         }
+
         throw new \BadMethodCallException($filename . ' does not exists');
     }
 
@@ -79,11 +84,12 @@ class Files {
     {
         $folder   = getcwd() . DIRECTORY_SEPARATOR . $source;
 
-        if ( is_dir( $folder ) ) {
-
+        if ( is_dir( $folder ) )
+        {
             passthru( "tar -zchvf " . $archive_name . 'tar.gz ' . $source );
-        } else {
-
+        }
+        else
+        {
             throw new \BadMethodCallException($folder . ' does not exists');
         }
     }
@@ -102,23 +108,23 @@ class Files {
         $sfs    = new \Symfony\Component\Filesystem\Filesystem();
         $io     = $event->getIO();
 
-        foreach ( $event->getComposer()->getRepositoryManager()->getLocalRepository()->getPackages() as $package ) {
-
-            if ( isset( $files[$package->getName()] ) ) {
-
+        foreach ( $event->getComposer()->getRepositoryManager()->getLocalRepository()->getPackages() as $package )
+        {
+            if ( isset( $files[$package->getName()] ) )
+            {
                 $packageDir = $event->getComposer()->getInstallationManager()->getInstallPath( $package );
 
                 $filesDefinitions = $files[$package->getName()];
 
-                foreach ( $filesDefinitions as $from => $to ) {
-
-                    if ( $fs->isAbsolutePath( $from ) ) {
-
+                foreach ( $filesDefinitions as $from => $to )
+                {
+                    if ( $fs->isAbsolutePath( $from ) )
+                    {
                         throw new \InvalidArgumentException( "Invalid target path '$from' for package'{$package->getName()}'." . ' It must be relative.' );
                     }
 
-                    if ( $fs->isAbsolutePath( $to ) ) {
-
+                    if ( $fs->isAbsolutePath( $to ) )
+                    {
                         throw new \InvalidArgumentException( "Invalid link path '$to' for package'{$package->getName()}'." . ' It must be relative.' );
                     }
 
@@ -127,42 +133,44 @@ class Files {
 
                     $fs->ensureDirectoryExists( dirname( $to ) );
 
-                    if ( is_dir( $from ) ) {
-
+                    if ( is_dir( $from ) )
+                    {
                         $finder->files()->in( $from );
 
-                        foreach ( $finder as $file ) {
-
+                        foreach ( $finder as $file )
+                        {
                             $dest = sprintf( '%s/%s', $to, $file->getRelativePathname() );
 
-                            try {
-
-                                if ( file_exists( $dest ) ) {
+                            try
+                            {
+                                if ( file_exists( $dest ) )
+                                {
                                     $fs->unlink( $dest );
                                 }
 
                                 $sfs->copy( $file, $dest );
 
-                            } catch ( IOException $e ) {
-
+                            } catch ( IOException $e )
+                            {
                                 throw new \InvalidArgumentException( sprintf( '<error>Could not copy %s</error>', $file->getBaseName() ) );
                             }
                         }
                     }
-                    else {
+                    else
+                    {
+                        try
+                        {
 
-                        try {
-
-                            if ( file_exists( $to ) ) {
+                            if ( file_exists( $to ) )
                                 $fs->unlink( $to );
-                            }
 
                             $sfs->copy( $from, $to );
 
                             $io->write( sprintf( '  Copying <comment>%s</comment> to <comment>%s</comment>.', str_replace( getcwd(), '', $from ), str_replace( getcwd(), '', $to ) ) );
 
-                        } catch ( IOException $e ) {
-
+                        }
+                        catch ( IOException $e )
+                        {
                             throw new \InvalidArgumentException( sprintf( '<error>Could not copy %s</error>', $from ) );
                         }
                     }
@@ -182,9 +190,8 @@ class Files {
 
         $symlinks = [];
 
-        if ( isset( $options[$id] ) && is_array( $options[$id] ) ) {
+        if ( isset( $options[$id] ) && is_array( $options[$id] ) )
             $symlinks = $options[$id];
-        }
 
         return $symlinks;
     }
@@ -199,40 +206,39 @@ class Files {
         $files = $this->get( $event, 'remove-file' );
 
         $fs  = new Filesystem();
-        $sfs = new \Symfony\Component\Filesystem\Filesystem();
         $io  = $event->getIO();
 
-        foreach ( $event->getComposer()->getRepositoryManager()->getLocalRepository()->getPackages() as $package ) {
-
-            if ( isset( $files[$package->getName()] ) ) {
-
+        foreach ( $event->getComposer()->getRepositoryManager()->getLocalRepository()->getPackages() as $package )
+        {
+            if ( isset( $files[$package->getName()] ) )
+            {
                 $filesDefinitions = $files[$package->getName()];
 
-                foreach ( $filesDefinitions as $file ) {
-
-                    if ( $fs->isAbsolutePath( $file ) ) {
-
+                foreach ( $filesDefinitions as $file )
+                {
+                    if ( $fs->isAbsolutePath( $file ) )
+                    {
                         throw new \InvalidArgumentException( "Invalid target path '$file' for package'{$package->getName()}'." . ' It must be relative.' );
                     }
 
                     $file = getcwd() . DIRECTORY_SEPARATOR . $file;
 
-                    try {
-
-                        if ( is_dir( $file ) ) {
-
+                    try
+                    {
+                        if ( is_dir( $file ) )
+                        {
                             $fs->removeDirectory( $file );
                             $io->write( sprintf( '  Removing directory <comment>%s</comment>.', str_replace( getcwd(), '', $file ) ) );
                         }
-                        elseif ( file_exists( $file ) ) {
-
+                        elseif ( file_exists( $file ) )
+                        {
                             $fs->unlink( $file );
                             $io->write( sprintf( '  Removing file <comment>%s</comment>.', str_replace( getcwd(), '', $file ) ) );
                         }
 
 
-                    } catch ( IOException $e ) {
-
+                    } catch ( IOException $e )
+                    {
                         throw new \InvalidArgumentException( sprintf( '<error>Could not remove %s</error>', $file ) );
                     }
                 }
@@ -250,7 +256,6 @@ class Files {
         $files = $this->get( $event, 'create-folder' );
 
         $fs  = new Filesystem();
-        $sfs = new \Symfony\Component\Filesystem\Filesystem();
         $io  = $event->getIO();
 
         foreach ( $event->getComposer()->getRepositoryManager()->getLocalRepository()->getPackages() as $package ) {
@@ -299,8 +304,8 @@ class Files {
         $args   = $event->getArguments();
 
         // Arguments checking
-        if ( count( $args ) < 2) {
-
+        if ( count( $args ) < 2)
+        {
             $files->io->writeError( "  Not enough argument\n".
             $files->getComposerSyncDescription());
 
@@ -313,28 +318,26 @@ class Files {
 
         $confirmed = true;
 
-        if ($action == 'deploy') {
-
+        if ($action == 'deploy')
+        {
             $files->loadConfig();
             $current_env = $files->getConfig()->get('environment');
 
             // Preventing mistakes
-            if ($current_env == 'local' && $env == 'production' && !(isset($options) && is_array($options) && in_array('force', $options))) {
-
+            if ($current_env == 'local' && $env == 'production' && !(isset($options) && is_array($options) && in_array('force', $options)))
+            {
                 $files->io->writeError("  ERROR: We are very sorry but you cannot deploy to production from a local environment. \n  If you really want to, try force or -f option".$files->getComposerSyncDescription());
                 return;
             }
 
             $confirmed = $files->io->askConfirmation( '  Please note that this will override current content in distant server. Continue ? [y,n] ', false);
 
-            if ($confirmed) {
-
+            if ($confirmed)
                 $confirmed = $files->io->askConfirmation( '  C\'mon.. Really ? [y,n] ', false);
 
-            }
-
-        } elseif ($action != 'withdraw') {
-
+        }
+        elseif ($action != 'withdraw')
+        {
             $files->io->writeError( "  Wrong action call\n".
                 "  action can be 'withdraw' or 'deploy' only.".$files->getComposerSyncDescription());
 
@@ -343,20 +346,19 @@ class Files {
 
 
         // Starting process
-        if ($confirmed) {
-
-            if (!$options || in_array('only-file', $options)) {
-
+        if ($confirmed)
+        {
+            if (!$options || in_array('only-file', $options))
+            {
                 // Starting Sync
-                $files->file_sync( $action, $env );
+                $files->fileSync( $action, $env );
             }
 
-            if (!$options || in_array('only-database', $options)) {
-
+            if (!$options || in_array('only-database', $options))
+            {
                 // Starting Database Import
-                $files->database_sync( $action, $env );
+                $files->databaseSync( $action, $env );
             }
-
 
             return;
         }
@@ -372,32 +374,33 @@ class Files {
      * @param string $direction 'withdraw' | 'deploy'
      * @param string $env 'production' | 'staging'
      */
-    public function file_sync($direction, $env)
+    public function fileSync($direction, $env)
     {
-
         $this->loadConfig();
         $remote_cfg = $this->config->get($env . '.ssh');
+        $port_option = '';
 
         // Assuming that all params are well written
-        if ( !$remote_cfg || !isset($remote_cfg['host'], $remote_cfg['root_dir'])) {
-
+        if ( !$remote_cfg || !isset($remote_cfg['host'], $remote_cfg['root_dir']))
+        {
             $this->io->writeError('  ERROR : ' . $env . ' file is not complete, please check up your configuration.');
             return;
         }
 
-        if (!isset($remote_cfg['rsync'])) {
-
+        if (!isset($remote_cfg['rsync']))
+        {
             $this->io->writeError('  ERROR : You must provide file names in rsync field.');
             return;
         }
 
-        if (isset($remote_cfg['port'])) {
+        if (isset($remote_cfg['port']))
+        {
             $port_option = "-p ".$remote_cfg['port']." ";
         }
 
         // Downloading each folder from source to destination
-        foreach ($remote_cfg['rsync'] as $local_folder) {
-
+        foreach ($remote_cfg['rsync'] as $local_folder)
+        {
             // user@domain.nom:/root_dir/path/to/dir/
             $distant_folder = $remote_cfg['host'] .':'. $remote_cfg['root_dir'] . $local_folder;
 
@@ -408,13 +411,13 @@ class Files {
             $mkdir_command = 'mkdir -p '.$local_folder;
 
             // Deploying to a server is just the reverse process
-            if ($direction == 'deploy') {
-
+            if ($direction == 'deploy')
+            {
                 $source = $local_folder;
                 $destination = $distant_folder;
 
                 // ssh user@domain.com (-p port) 'cd /root_dir/ && mkdir -p path/to/dir/'
-                $mkdir_command = 'ssh '.$remote_cfg['host']." ".(isset($port_option)?$port_option:'')." 'cd ".$remote_cfg['root_dir']." && mkdir -p ".$local_folder."'";
+                $mkdir_command = 'ssh '.$remote_cfg['host']." ".$port_option." 'cd ".$remote_cfg['root_dir']." && ".$mkdir_command."'";
             }
 
             $confirm = $this->io->askConfirmation("\n  Please confirm informations :".
@@ -423,25 +426,36 @@ class Files {
                 "\n  Continue ? [y,n] "
             );
 
-            if (!$confirm) {
+            if (!$confirm)
+            {
                 $this->io->write('  Skipping file.');
                 continue;
             }
 
             passthru($mkdir_command);
 
-            if (isset($port_option)) {
+            $this->_rsync($source, $destination, $port_option);
 
-                $this->_rsync($source, $destination, $port_option);
-            } else {
+            // ssh user@domain.com (-p port) 'cd /root_dir/ && mkdir -p path/to/dir/'
+            $commands  = "sudo chown -R $(id -g):www-data ".$local_folder;
+            $commands .= " && sudo find ".$local_folder." -type f -exec chmod 664 {} \\;";
+            $commands .= " && sudo find ".$local_folder." -type d -exec chmod 775 {} \\;";
 
-                $this->_rsync($source, $destination);
+            // Deploying to a server is just the reverse process
+            if ($direction == 'deploy')
+            {
+                $permission_command = 'ssh '.$remote_cfg['host']." ".$port_option." 'cd ".$remote_cfg['root_dir']." && ".$commands."'";
+                passthru($permission_command);
+            }
+            else
+            {
+                passthru($commands);
             }
         }
         
     }
 
-    public function database_sync($action, $env)
+    public function databaseSync($action, $env)
     {
         $this->loadConfig();
 
@@ -449,8 +463,8 @@ class Files {
         $remote_cfg = $this->config->get($env);
 
         // Assuming that all params are well written
-        if ( !isset($remote_cfg['ssh']['host'], $remote_cfg['ssh']['root_dir'])) {
-
+        if ( !isset($remote_cfg['ssh']['host'], $remote_cfg['ssh']['root_dir']))
+        {
             $this->io->writeError('  ERROR : ' . $env . ' file is not complete, please check up your configuration.'.$this->getComposerSyncDescription());
             return;
         }
@@ -463,15 +477,14 @@ class Files {
         }
     }
 
-    private function _rsync($source, $destination, $port_option = null)
+    private function _rsync($source, $destination, $port_option = '')
     {
+        $port_option = empty($port_option)?"":" -e 'ssh ".$port_option."' ";
 
-        passthru("rsync ".
-            (isset($port_option)?" -e 'ssh ".$port_option."' ":"").
+        passthru("rsync ".$port_option.
             "--recursive --human-readable --verbose --perms --times --compress --prune-empty-dirs ".
             "--force --delete-after --links --delete-excluded ".
-            $source . " " .
-            $destination);
+            $source . " " .$destination);
     }
 
 

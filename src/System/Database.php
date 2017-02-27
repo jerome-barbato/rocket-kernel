@@ -147,32 +147,21 @@ class Database {
      */
     public function withdraw($remote_cfg)
     {
-
         $tmp_dir = 'var';
 
-        if ( isset( $remote_cfg['database']['replace'] ) ) {
-            $replacements = $remote_cfg['database']['replace'];
-
-        }
-        else {
-
-            $replacements = false;
-        }
+        $replacements = isset( $remote_cfg['database']['replace'] ) ? $remote_cfg['database']['replace'] : false;
 
         // Creating local informations
-        $local_cfg = [];
-        // Common configuration
-        $local_cfg['user']     = $this->config->get( 'database.user' );
-        $local_cfg['password'] = $this->config->get( 'database.password' );
-        $local_cfg['name']     = $this->config->get( 'database.name' );
-        $local_cfg['host']     = "localhost";
+        $local_cfg = $this->config->get('database');
+
+        if( !isset($local_cfg['host']) )
+            $local_cfg['host'] = "localhost";
 
         $exported_db = $this->export( $tmp_dir, $remote_cfg['database'], $replacements );
 
         $this->import( $exported_db, $local_cfg );
 
         unlink( $exported_db );
-
     }
 
 
@@ -183,34 +172,30 @@ class Database {
      */
     public function deploy($remote_cfg)
     {
-
         $tmp_dir = 'var';
 
-        if ( isset( $remote_cfg['database']['replace'] ) ) {
-
+        if ( isset( $remote_cfg['database']['replace'] ) )
+        {
             // deployment is the reverse replacement array
             $replacements = [];
-            foreach ( $remote_cfg['database']['replace'] as $replacement ) {
-
-                foreach ( $replacement as $new => $old ) {
-
+            foreach ( $remote_cfg['database']['replace'] as $replacement )
+            {
+                foreach ( $replacement as $new => $old )
+                {
                     $replacements[] = [$old => $new];
                 }
             }
-
         }
-        else {
-
+        else
+        {
             $replacements = false;
         }
 
         // Creating local informations
-        $local_cfg = [];
-        // Common configuration
-        $local_cfg['user']     = $this->config->get( 'database.user' );
-        $local_cfg['password'] = $this->config->get( 'database.password' );
-        $local_cfg['name']     = $this->config->get( 'database.name' );
-        $local_cfg['host']     = "localhost";
+        $local_cfg = $this->config->get('database');
+
+        if( !isset($local_cfg['host']) )
+            $local_cfg['host'] = "localhost";
 
         $exported_db = $this->export( $tmp_dir, $local_cfg, $replacements );
 
@@ -219,38 +204,39 @@ class Database {
         unlink( $exported_db );
     }
 
+
     /**
      * Import database
      */
     public function import($archive_path, $db_infos)
     {
-
-        if ( !is_array( $db_infos ) || !isset( $db_infos['user'], $db_infos['password'], $db_infos['name'], $db_infos['host'] ) ) {
+        if ( !is_array( $db_infos ) || !isset( $db_infos['user'], $db_infos['password'], $db_infos['name'], $db_infos['host'] ) )
+        {
             throw new \InvalidArgumentException( "Database informations are not complete." );
         }
 
-        if ( file_exists( $archive_path ) ) {
+        if ( file_exists( $archive_path ) )
+        {
+            $confirm = $this->io->askConfirmation( "  File name : " . $archive_path . "\n  Confirm import ? [y,n] ", false );
 
-            $confirm = $this->io->askConfirmation( "  File name : " . getcwd() . DIRECTORY_SEPARATOR . $archive_path . "\n  Confirm import ? [y,n] ", false );
-
-            if ( $confirm ) {
-
+            if ( $confirm )
+            {
                 $file_info = pathinfo( $archive_path );
 
                 $command = "";
 
                 // extracting file content
-                if ( $file_info['extension'] == 'gz' ) {
+                if ( $file_info['extension'] == 'gz' )
+                {
                     $command .= "zcat " . $archive_path . " | ";
                 }
+
                 $command .= "mysql -u " . $db_infos['user'] . " -h " . $db_infos['host'] . " --password='" . $db_infos['password'] . "' " . $db_infos['name'];
 
                 passthru( $command );
 
                 $this->io->write( "\n  Import complete." );
             }
-
-
         }
         else {
 
@@ -264,15 +250,17 @@ class Database {
      *
      * @param $export_dir string path to exported database
      * @param $db_infos   array database infos
+     * @param bool $replacements
+     * @return string filename
      */
     public function export($export_dir, $db_infos, $replacements = false)
     {
-
-        if ( !$export_dir ) {
-
+        if ( !$export_dir )
+        {
             $backup_path = getcwd() . DIRECTORY_SEPARATOR . "app/resources/db";
         }
-        else {
+        else
+        {
             $backup_path = getcwd() . DIRECTORY_SEPARATOR . $export_dir;
         }
 
@@ -305,14 +293,15 @@ class Database {
      */
     private function getReplace($replacements)
     {
+        $command = '';
 
-        if ( isset( $replacements ) ) {
-
+        if ( isset( $replacements ) )
+        {
             $command = "sed '";
-            foreach ( $replacements as $replacement ) {
-
-                foreach ( $replacement as $old => $new ) {
-
+            foreach ( $replacements as $replacement )
+            {
+                foreach ( $replacement as $old => $new )
+                {
                     $command .= "s," . $old . "," . $new . ",g; ";
                 }
             }
@@ -328,7 +317,6 @@ class Database {
      */
     public function getComposerDatabaseDescription()
     {
-
         return "\n  ----------------- \n" . "  COMPOSER DATABASE \n" . "  ----------------- \n" . "  composer database [action] [path]\n" . "           [action] : \n" . "             - import\n" . "             - export\n" . "           [path] : relative path to directory or database\n";
     }
 }
