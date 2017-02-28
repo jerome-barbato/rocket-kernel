@@ -52,6 +52,6 @@ class CmsInstaller extends LibraryInstaller
      */
     public function supports($packageType)
     {
-        return array_key_exists($packageType, CmsInstaller::$supported_types);
+        return in_array($packageType, CmsInstaller::$supported_types);
     }
 }
