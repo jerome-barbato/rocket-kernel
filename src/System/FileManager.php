@@ -133,12 +133,19 @@ class FileManager {
                 {
                     $dest = sprintf( '%s/%s', $to, $file->getRelativePathname() );
 
-                    if ( file_exists( $dest ) )
+                    try
                     {
-                        $fs->unlink( $dest );
-                    }
+                        if ( file_exists( $dest ) )
+                        {
+                            $fs->unlink( $dest );
+                        }
 
-                    $sfs->copy( $file, $dest );
+                        $sfs->copy( $file, $dest );
+
+                    } catch ( IOException $e )
+                    {
+                        throw new \InvalidArgumentException( sprintf( '<error>Could not copy %s</error>', $file->getBaseName() . " \n" . $e->getMessage() ) );
+                    }
                 }
             }
             else
@@ -156,7 +163,7 @@ class FileManager {
                 }
                 catch ( IOException $e )
                 {
-                    throw new \InvalidArgumentException( sprintf( '<error>Could not copy %s</error>', $from ) );
+                    throw new \InvalidArgumentException( sprintf( '<error>Could not copy %s</error>', $from. " \n" . $e->getMessage() ) );
                 }
             }
         }
