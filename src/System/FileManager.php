@@ -144,7 +144,7 @@ class FileManager {
 
                     } catch ( IOException $e )
                     {
-                        throw new \InvalidArgumentException( sprintf( '<error>Could not copy %s</error>', $file->getBaseName() ) );
+                        throw new \InvalidArgumentException( sprintf( '<error>Could not copy %s</error>', $file->getBaseName() . " \n" . $e->getMessage() ) );
                     }
                 }
             }
