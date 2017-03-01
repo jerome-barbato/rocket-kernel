@@ -104,18 +104,14 @@ class Installer {
         /** @var Package $installedPackage */
         $installedPackage = $event->getOperation()->getPackage();
 
-        $cms = ['metabolism/rocket-wordpress', 'metabolism/rocket-drupal', 'metabolism/rocket-builder', 'metabolism/rocket-silex'];
-
-        if (in_array($installedPackage->getName(), $cms)) {
-
             /** @var Package $root_pkg */
             $root_pkg = $event->getComposer()->getPackage();
             $extras = $root_pkg->getExtra();
 
 
-            if (isset($extras["folders"]))
+            if (isset($extras["file-management"]))
             {
-                foreach ($extras['folders'] as $action => $pkg_names) {
+                foreach ($extras['file-management'] as $action => $pkg_names) {
 
                     if (array_key_exists($installedPackage->getName(), $pkg_names)) {
 
@@ -138,37 +134,6 @@ class Installer {
 
                 }
             }
-
-            die;
-        }
-        /*
-        // Creating missing folders
-        $this->getFiles()->createFolder( $this->event );
-
-        // Symlinking
-        $this->getSymlinks()->create( $this->event );
-
-        // Copying important files
-        $this->getFiles()->copy( $this->event );
-        */
-    }
-
-    /**
-     * @return FileManager
-     */
-    public function getFiles()
-    {
-
-        return $this->files;
-    }
-
-    /**
-     * @return Symlink
-     */
-    public function getSymlinks()
-    {
-
-        return $this->symlinks;
     }
 
     /**
