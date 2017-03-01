@@ -9,7 +9,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 * Database class can now import from compressed archive.
 * File class can now perform deployment or withdrawal.
 * New Composer custom installer for Wordpress and Drupal CMS, you can now use composer type `rocket-cms` to migrate a package to cms folder. ( default : `web/edition/` ).
+* Added Composer checking version.
 ### Changed
+* Composer System Installer is now deprecated and replaced by Composer Installer.
 * Application environnment is now set to production by default
 * Clean function has been removed from composer install
 * Complete code review for standard coding syntax.

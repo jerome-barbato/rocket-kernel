@@ -12,7 +12,7 @@ use Composer\Installer\LibraryInstaller;
 class CmsInstaller extends LibraryInstaller
 {
 
-    private static $supported_types = array("wordpress-core", "rocket-cms");
+    private static $supported_types = array("wordpress-core", "rocket-cms", "drupal-core");
     private static $_installedPaths = array();
     /**
      * {@inheritDoc}
