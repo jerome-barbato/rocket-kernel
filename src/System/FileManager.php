@@ -5,11 +5,10 @@ namespace Rocket\System;
 use Composer\IO\IOInterface;
 use Composer\Package\Package;
 use Composer\Script\Event;
-use Composer\Util\FileManagerystem;
-use Composer\Util\Filesystem;
+use Composer\Util\FileSystem;
 use Dflydev\DotAccessData\Data;
 use Rocket\Application\SingletonTrait;
-use Symfony\Component\FileManagerystem\Exception\IOException;
+use Symfony\Component\FileSystem\Exception\IOException;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 
@@ -106,7 +105,7 @@ class FileManager {
     {
         $finder = new Finder;
         $fs     = new FileSystem();
-        $sfs    = new \Symfony\Component\FileManagerystem\FileManagerystem();
+        $sfs    = new \Symfony\Component\FileSystem\FileSystem();
         $packageDir = DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . $package->getName();
 
         foreach ( $files as $from => $to )
