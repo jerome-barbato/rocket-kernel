@@ -7,6 +7,7 @@ namespace Rocket\Composer;
 
 
 use Composer\Script\Event;
+use Composer\Semver\Comparator;
 use Rocket\Application\SingletonTrait;
 
 /**
