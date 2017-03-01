@@ -106,7 +106,7 @@ class FileManager {
         $finder = new Finder;
         $fs     = new FileSystem();
         $sfs    = new \Symfony\Component\Filesystem\Filesystem();
-        $packageDir = DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . $package->getName();
+        $packageDir = 'vendor' . DIRECTORY_SEPARATOR . $package->getName();
 
         foreach ( $files as $from => $to )
         {
