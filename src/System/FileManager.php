@@ -2,22 +2,25 @@
 
 namespace Rocket\System;
 
+use Composer\IO\IOInterface;
+use Composer\Package\Package;
 use Composer\Script\Event;
+use Composer\Util\FileManagerystem;
 use Composer\Util\Filesystem;
 use Dflydev\DotAccessData\Data;
 use Rocket\Application\SingletonTrait;
-use Symfony\Component\Filesystem\Exception\IOException;
+use Symfony\Component\FileManagerystem\Exception\IOException;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 
 /**
- * Class Files
+ * Class FileManager
  *
  * File Manager
  *
  * @package Rocket\System
  */
-class Files {
+class FileManager {
 
     use SingletonTrait;
 
@@ -29,11 +32,11 @@ class Files {
     private $event, $io, $config;
 
     /**
-     * Files constructor.
+     * FileManager constructor.
      *
      * @param Event $event
      */
-    public function __construct(Event $event)
+    public function __construct($event)
     {
 
         $this->event = $event;
@@ -99,81 +102,69 @@ class Files {
      *
      * @param Event $event
      */
-    public function copy(Event $event)
+    public function copy($files, $package, $io)
     {
-        $files = $this->get( $event, 'copy-file' );
-
         $finder = new Finder;
-        $fs     = new Filesystem();
-        $sfs    = new \Symfony\Component\Filesystem\Filesystem();
-        $io     = $event->getIO();
+        $fs     = new FileSystem();
+        $sfs    = new \Symfony\Component\FileManagerystem\FileManagerystem();
+        $packageDir = DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . $package->getName();
 
-        foreach ( $event->getComposer()->getRepositoryManager()->getLocalRepository()->getPackages() as $package )
+        foreach ( $files as $from => $to )
         {
-            if ( isset( $files[$package->getName()] ) )
+            if ( $fs->isAbsolutePath( $from ) )
             {
-                $packageDir = $event->getComposer()->getInstallationManager()->getInstallPath( $package );
+                throw new \InvalidArgumentException( "Invalid target path '$from' for package'{$package->getName()}'." . ' It must be relative.' );
+            }
 
-                $filesDefinitions = $files[$package->getName()];
+            if ( $fs->isAbsolutePath( $to ) )
+            {
+                throw new \InvalidArgumentException( "Invalid link path '$to' for package'{$package->getName()}'." . ' It must be relative.' );
+            }
 
-                foreach ( $filesDefinitions as $from => $to )
+            $from = $packageDir . DIRECTORY_SEPARATOR . $from;
+            $to   = getcwd() . DIRECTORY_SEPARATOR . $to;
+
+            $fs->ensureDirectoryExists( dirname( $to ) );
+
+            if ( is_dir( $from ) )
+            {
+                $finder->FileManager()->in( $from );
+
+                foreach ( $finder as $file )
                 {
-                    if ( $fs->isAbsolutePath( $from ) )
+                    $dest = sprintf( '%s/%s', $to, $file->getRelativePathname() );
+
+                    try
                     {
-                        throw new \InvalidArgumentException( "Invalid target path '$from' for package'{$package->getName()}'." . ' It must be relative.' );
-                    }
-
-                    if ( $fs->isAbsolutePath( $to ) )
-                    {
-                        throw new \InvalidArgumentException( "Invalid link path '$to' for package'{$package->getName()}'." . ' It must be relative.' );
-                    }
-
-                    $from = $packageDir . DIRECTORY_SEPARATOR . $from;
-                    $to   = getcwd() . DIRECTORY_SEPARATOR . $to;
-
-                    $fs->ensureDirectoryExists( dirname( $to ) );
-
-                    if ( is_dir( $from ) )
-                    {
-                        $finder->files()->in( $from );
-
-                        foreach ( $finder as $file )
+                        if ( file_exists( $dest ) )
                         {
-                            $dest = sprintf( '%s/%s', $to, $file->getRelativePathname() );
-
-                            try
-                            {
-                                if ( file_exists( $dest ) )
-                                {
-                                    $fs->unlink( $dest );
-                                }
-
-                                $sfs->copy( $file, $dest );
-
-                            } catch ( IOException $e )
-                            {
-                                throw new \InvalidArgumentException( sprintf( '<error>Could not copy %s</error>', $file->getBaseName() ) );
-                            }
+                            $fs->unlink( $dest );
                         }
-                    }
-                    else
+
+                        $sfs->copy( $file, $dest );
+
+                    } catch ( IOException $e )
                     {
-                        try
-                        {
-
-                            if ( file_exists( $to ) )
-                                $fs->unlink( $to );
-
-                            $sfs->copy( $from, $to );
-
-                            $io->write( sprintf( '  Copying <comment>%s</comment> to <comment>%s</comment>.', str_replace( getcwd(), '', $from ), str_replace( getcwd(), '', $to ) ) );
-
-                        }
-                        catch ( IOException $e )
-                        {
-                            throw new \InvalidArgumentException( sprintf( '<error>Could not copy %s</error>', $from ) );
-                        }
+                        throw new \InvalidArgumentException( sprintf( '<error>Could not copy %s</error>', $file->getBaseName() ) );
                     }
+                }
+            }
+            else
+            {
+                try
+                {
+
+                    if ( file_exists( $to ) )
+                        $fs->unlink( $to );
+
+                    $sfs->copy( $from, $to );
+
+                    $io->write( sprintf( '  Copying <comment>%s</comment> to <comment>%s</comment>.', str_replace( getcwd(), '', $from ), str_replace( getcwd(), '', $to ) ) );
+
+                }
+                catch ( IOException $e )
+                {
+                    throw new \InvalidArgumentException( sprintf( '<error>Could not copy %s</error>', $from ) );
                 }
             }
         }
@@ -201,47 +192,36 @@ class Files {
      *
      * @param Event $event
      */
-    public function remove(Event $event)
+    public function remove($files, $package, $io)
     {
-        $files = $this->get( $event, 'remove-file' );
+        $fs  = new FileSystem();
 
-        $fs  = new Filesystem();
-        $io  = $event->getIO();
-
-        foreach ( $event->getComposer()->getRepositoryManager()->getLocalRepository()->getPackages() as $package )
+        foreach ( $files as $file )
         {
-            if ( isset( $files[$package->getName()] ) )
+            if ( $fs->isAbsolutePath( $file ) )
             {
-                $filesDefinitions = $files[$package->getName()];
+                throw new \InvalidArgumentException( "Invalid target path '$file' for package'{$package->getName()}'." . ' It must be relative.' );
+            }
 
-                foreach ( $filesDefinitions as $file )
+            $file = getcwd() . DIRECTORY_SEPARATOR . $file;
+
+            try
+            {
+                if ( is_dir( $file ) )
                 {
-                    if ( $fs->isAbsolutePath( $file ) )
-                    {
-                        throw new \InvalidArgumentException( "Invalid target path '$file' for package'{$package->getName()}'." . ' It must be relative.' );
-                    }
-
-                    $file = getcwd() . DIRECTORY_SEPARATOR . $file;
-
-                    try
-                    {
-                        if ( is_dir( $file ) )
-                        {
-                            $fs->removeDirectory( $file );
-                            $io->write( sprintf( '  Removing directory <comment>%s</comment>.', str_replace( getcwd(), '', $file ) ) );
-                        }
-                        elseif ( file_exists( $file ) )
-                        {
-                            $fs->unlink( $file );
-                            $io->write( sprintf( '  Removing file <comment>%s</comment>.', str_replace( getcwd(), '', $file ) ) );
-                        }
-
-
-                    } catch ( IOException $e )
-                    {
-                        throw new \InvalidArgumentException( sprintf( '<error>Could not remove %s</error>', $file ) );
-                    }
+                    $fs->removeDirectory( $file );
+                    $io->write( sprintf( '  Removing directory <comment>%s</comment>.', str_replace( getcwd(), '', $file ) ) );
                 }
+                elseif ( file_exists( $file ) )
+                {
+                    $fs->unlink( $file );
+                    $io->write( sprintf( '  Removing file <comment>%s</comment>.', str_replace( getcwd(), '', $file ) ) );
+                }
+
+
+            } catch ( IOException $e )
+            {
+                throw new \InvalidArgumentException( sprintf( '<error>Could not remove %s</error>', $file ) );
             }
         }
     }
@@ -249,65 +229,96 @@ class Files {
     /**
      * Folder Creation
      *
-     * @param Event $event
+     * @param array $files
+     * @param Package $package
      */
-    public function createFolder(Event $event)
+    public function create($files, $package, $io)
     {
-        $files = $this->get( $event, 'create-folder' );
+        $fs = new Filesystem();
+        foreach ( $files as $file => $permissions ) {
 
-        $fs  = new Filesystem();
-        $io  = $event->getIO();
+            if ( $fs->isAbsolutePath( $file ) ) {
 
-        foreach ( $event->getComposer()->getRepositoryManager()->getLocalRepository()->getPackages() as $package ) {
+                throw new \InvalidArgumentException( "Invalid target path '$file' It must be relative." );
+            }
 
-            if ( isset( $files[$package->getName()] ) ) {
+            $file = getcwd() . DIRECTORY_SEPARATOR . $file;
 
-                $filesDefinitions = $files[$package->getName()];
+            try {
 
-                foreach ( $filesDefinitions as $file => $permissions ) {
+                if ( !is_dir( $file ) && !file_exists( $file ) ) {
 
-                    if ( $fs->isAbsolutePath( $file ) ) {
+                    $io->write( sprintf( '  Creating directory <comment>%s</comment>.', str_replace( getcwd(), '', $file ) ) );
 
-                        throw new \InvalidArgumentException( "Invalid target path '$file' for package'{$package->getName()}'." . ' It must be relative.' );
-                    }
-
-                    $file = getcwd() . DIRECTORY_SEPARATOR . $file;
-
-                    try {
-
-                        if ( !is_dir( $file ) && !file_exists( $file ) ) {
-
-                            $io->write( sprintf( '  Creating directory <comment>%s</comment>.', str_replace( getcwd(), '', $file ) ) );
-
-                            $oldmask = umask( 0 );
-                            mkdir( $file, octdec( $permissions ) );
-                            umask( $oldmask );
-                        }
-                    } catch ( IOException $e ) {
-
-                        throw new \InvalidArgumentException( sprintf( '<error>Could not create %s</error>', $e ) );
-                    }
+                    $oldmask = umask( 0 );
+                    mkdir( $file, octdec( $permissions ) );
+                    umask( $oldmask );
                 }
+            } catch ( IOException $e ) {
+
+                throw new \InvalidArgumentException( sprintf( '<error>Could not create %s</error>', $e ) );
             }
         }
     }
 
 
     /**
-     * Synchronize files
+     * @param array $files
+     * @param Package $package
+     * @param IOInterface $io
+     */
+    public function symlink($files, $package, $io)
+    {
+        $fs = new Filesystem();
+        $packageDir = DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . $package->getName();
+
+        foreach ( $files as $target => $link ) {
+
+            if ( $fs->isAbsolutePath( $target ) ) {
+
+                throw new \InvalidArgumentException( "Invalid symlink target path '$target' for package '{$package->getName()}'." . ' It must be relative.' );
+            }
+
+            if ( $fs->isAbsolutePath( $link ) ) {
+
+                throw new \InvalidArgumentException( "Invalid symlink link path '$link' for package '{$package->getName()}'." . ' It must be relative.' );
+            }
+
+            $targetPath = getcwd() . $packageDir . DIRECTORY_SEPARATOR . $target;
+            $linkPath   = getcwd() . DIRECTORY_SEPARATOR . $link;
+
+            if ( !file_exists( $targetPath ) ) {
+
+                throw new \RuntimeException( "The target path '$targetPath' for package'{$package->getName()}' does not exist." );
+            }
+
+            if ( !file_exists( $linkPath ) ) {
+
+                $io->write( sprintf( "  Symlinking <comment>%s</comment> to <comment>%s</comment>", str_replace( getcwd(), '', $targetPath ), str_replace( getcwd(), '', $linkPath ) ) );
+
+                $fs->ensureDirectoryExists( dirname( $linkPath ) );
+                $fs->relativeSymlink( $targetPath, $linkPath );
+
+            }
+        }
+    }
+
+
+    /**
+     * Synchronize FileManager
      * @param Event $event
      */
     public static function sync(Event $event)
     {
-        /** @var Files $files */
-        $files  = Files::getInstance( $event );
+        /** @var FileManager $FileManager */
+        $FileManager  = FileManager::getInstance( $event );
         $args   = $event->getArguments();
 
         // Arguments checking
         if ( count( $args ) < 2)
         {
-            $files->io->writeError( "  Not enough argument\n".
-            $files->getComposerSyncDescription());
+            $FileManager->io->writeError( "  Not enough argument\n".
+            $FileManager->getComposerSyncDescription());
 
             return;
         }
@@ -320,26 +331,26 @@ class Files {
 
         if ($action == 'deploy')
         {
-            $files->loadConfig();
-            $current_env = $files->getConfig()->get('environment');
+            $FileManager->loadConfig();
+            $current_env = $FileManager->getConfig()->get('environment');
 
             // Preventing mistakes
             if ($current_env == 'local' && $env == 'production' && !(isset($options) && is_array($options) && in_array('force', $options)))
             {
-                $files->io->writeError("  ERROR: We are very sorry but you cannot deploy to production from a local environment. \n  If you really want to, try force or -f option".$files->getComposerSyncDescription());
+                $FileManager->io->writeError("  ERROR: We are very sorry but you cannot deploy to production from a local environment. \n  If you really want to, try force or -f option".$FileManager->getComposerSyncDescription());
                 return;
             }
 
-            $confirmed = $files->io->askConfirmation( '  Please note that this will override current content in distant server. Continue ? [y,n] ', false);
+            $confirmed = $FileManager->io->askConfirmation( '  Please note that this will override current content in distant server. Continue ? [y,n] ', false);
 
             if ($confirmed)
-                $confirmed = $files->io->askConfirmation( '  C\'mon.. Really ? [y,n] ', false);
+                $confirmed = $FileManager->io->askConfirmation( '  C\'mon.. Really ? [y,n] ', false);
 
         }
         elseif ($action != 'withdraw')
         {
-            $files->io->writeError( "  Wrong action call\n".
-                "  action can be 'withdraw' or 'deploy' only.".$files->getComposerSyncDescription());
+            $FileManager->io->writeError( "  Wrong action call\n".
+                "  action can be 'withdraw' or 'deploy' only.".$FileManager->getComposerSyncDescription());
 
             return;
         }
@@ -351,30 +362,30 @@ class Files {
             if (!$options || in_array('only-file', $options))
             {
                 // Starting Sync
-                $files->fileSync( $action, $env );
+                $FileManager->FileManagerync( $action, $env );
             }
 
             if (!$options || in_array('only-database', $options))
             {
                 // Starting Database Import
-                $files->databaseSync( $action, $env );
+                $FileManager->databaseSync( $action, $env );
             }
 
             return;
         }
 
-        $files->io->write( '  Abording process.' );
+        $FileManager->io->write( '  Abording process.' );
 
     }
 
 
     /**
-     * Import folders and files to a specific destination according to remote.yml configuration.
+     * Import folders and FileManager to a specific destination according to remote.yml configuration.
      * BE CAREFUL WITH THIS FUNCTION
      * @param string $direction 'withdraw' | 'deploy'
      * @param string $env 'production' | 'staging'
      */
-    public function fileSync($direction, $env)
+    public function FileManagerync($direction, $env)
     {
         $this->loadConfig();
         $remote_cfg = $this->config->get($env . '.ssh');
@@ -489,7 +500,7 @@ class Files {
 
 
     /**
-     * Retrieve configuration from app/config Yaml files
+     * Retrieve configuration from app/config Yaml FileManager
      * @return Data
      */
     public function loadConfig()

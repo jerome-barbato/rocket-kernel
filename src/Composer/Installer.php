@@ -6,9 +6,12 @@
 namespace Rocket\Composer;
 
 
+use Composer\Package\Package;
 use Composer\Script\Event;
+use Composer\Installer\PackageEvent;
 use Composer\Semver\Comparator;
 use Rocket\Application\SingletonTrait;
+use Rocket\System\FileManager;
 
 /**
  * Class Installer
@@ -23,8 +26,7 @@ class Installer {
 
     public function __construct(Event $event)
     {
-        $this->files    = new Files( $event );
-        $this->symlinks = new Symlink();
+        $this->files    = new FileManager( $event );
         $this->event    = $event;
         $this->io       = $event->getIO();
 
@@ -35,15 +37,13 @@ class Installer {
     /**
      * Composer initializer
      *
-     * @param $event Event
      */
     public static function init(Event $event)
     {
-        /** @var Installer $installer */
-        $installer = Installer::getInstance( $event );
 
         passthru( "git lfs install" );
-        $installer->createFolders();
+
+        self::checkComposerVersion($event);
     }
 
     /**
@@ -76,6 +76,7 @@ class Installer {
 
         $args = $event->getArguments();
 
+
         if ( is_dir( $installer->builder_path ) ) {
             chdir( $installer->builder_path );
 
@@ -98,8 +99,49 @@ class Installer {
     /**
      * Creating importants files for next steps
      */
-    public function createFolders()
+    public static function install(PackageEvent $event)
     {
+        /** @var Package $installedPackage */
+        $installedPackage = $event->getOperation()->getPackage();
+
+        $cms = ['metabolism/rocket-wordpress', 'metabolism/rocket-drupal', 'metabolism/rocket-builder', 'metabolism/rocket-silex'];
+
+        if (in_array($installedPackage->getName(), $cms)) {
+
+            /** @var Package $root_pkg */
+            $root_pkg = $event->getComposer()->getPackage();
+            $extras = $root_pkg->getExtra();
+
+
+            if (isset($extras["folders"]))
+            {
+                foreach ($extras['folders'] as $action => $pkg_names) {
+
+                    if (array_key_exists($installedPackage->getName(), $pkg_names)) {
+
+                        /** @var FileManager $fm */
+                        $fm = FileManager::getInstance($event);
+
+                        if (method_exists($fm, $action)) {
+
+                            try {
+
+                                $fm->$action($pkg_names[$installedPackage->getName()], $installedPackage, $event->getIO());
+                            } catch (\Exception $e) {
+
+                                $event->getIO()->writeError("<error>Error: " . $action . " action on " . $installedPackage->getName() . " : \n" . $e->getMessage() . "</error>");                        }
+                        } else {
+
+                            $event->getIO()->writeError("<warning> Skipping extra folder action : " . $action . ", method does not exist.</warning>");
+                        }
+                    }
+
+                }
+            }
+
+            die;
+        }
+        /*
         // Creating missing folders
         $this->getFiles()->createFolder( $this->event );
 
@@ -108,10 +150,11 @@ class Installer {
 
         // Copying important files
         $this->getFiles()->copy( $this->event );
+        */
     }
 
     /**
-     * @return Files
+     * @return FileManager
      */
     public function getFiles()
     {
