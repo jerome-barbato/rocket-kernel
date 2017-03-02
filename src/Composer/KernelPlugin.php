@@ -10,19 +10,22 @@ use Composer\IO\IOInterface;
 use Composer\Plugin\PluginInterface;
 
 /**
- * Class CmsPlugin
+ * Class KernelPlugin
  *
  * @package Rocket\Composer
  */
-class CmsPlugin implements PluginInterface
+class KernelPlugin implements PluginInterface
 {
-    /**
-     * @param Composer    $composer
-     * @param IOInterface $io
-     */
+
     public function activate(Composer $composer, IOInterface $io)
     {
-        $installer = new CmsInstaller($io, $composer);
-        $composer->getInstallationManager()->addInstaller($installer);
+
+    }
+
+    public function getCapabilities()
+    {
+        return [
+            'Composer\Plugin\Capability\CommandProvider' => 'Rocket\Composer\Command\KernelCommandProvider'
+        ];
     }
 }
