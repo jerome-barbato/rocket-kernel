@@ -1,33 +1,37 @@
 {
-    "name":"metabolism/rocket-kernel",
-    "version":"1.0.5",
-    "license": "AGPL-3.0",
-    "authors": [
-        {
-            "name": "Jérôme BARBATO",
-            "email": "jerome@metabolism.fr"
-        },
-        {
-            "name": "Paul COUDEVILLE",
-            "email": "paul@metabolism.fr"
-        }
-    ],
-    "description": "Rocket Kernel",
-    "require": {
-        "php" : ">=5.5.0",
-        "composer-plugin-api": "^1.0",
-        "mustangostang/spyc": "^0.6.1",
-        "dflydev/dot-access-data": "^1.0"
+  "name": "metabolism/rocket-kernel",
+  "version": "1.0.6",
+  "type": "composer-plugin",
+  "license": "AGPL-3.0",
+  "authors": [
+    {
+      "name": "Jérôme BARBATO",
+      "email": "jerome@metabolism.fr"
     },
-    "require-dev": {
-        "composer/composer": "1.0.*@dev",
-        "symfony/filesystem": "~2.7",
-        "symfony/finder": "~2.7",
-        "mikey179/vfsStream": "~1"
-    },
-    "autoload"    : {
-        "psr-4" : {
-            "Rocket\\" : "src/"
-        }
+    {
+      "name": "Paul COUDEVILLE",
+      "email": "paul@metabolism.fr"
     }
+  ],
+  "description": "Rocket Kernel",
+  "require": {
+    "php": ">=5.5.0",
+    "composer-plugin-api": "^1.0",
+    "mustangostang/spyc": "^0.6.1",
+    "dflydev/dot-access-data": "^1.0"
+  },
+  "require-dev": {
+    "composer/composer": "1.0.*@dev",
+    "symfony/filesystem": "~2.7",
+    "symfony/finder": "~2.7",
+    "mikey179/vfsStream": "~1"
+  },
+  "autoload": {
+    "psr-4": {
+      "Rocket\\": "src/"
+    }
+  },
+  "extra": {
+    "class": "Rocket\\Composer\\CmsPlugin"
+  }
 }
