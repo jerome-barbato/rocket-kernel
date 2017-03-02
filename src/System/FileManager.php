@@ -398,7 +398,7 @@ class FileManager {
         }
 
         /** @var Database $db */
-        $db = Database::getInstance($this->event);
+        $db = Database::getInstance($this->io);
 
         if (method_exists($db, $action)) {
             $db->$action($remote_cfg);

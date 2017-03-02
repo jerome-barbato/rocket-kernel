@@ -7,6 +7,7 @@ namespace Rocket\Composer;
 
 use Composer\Composer;
 use Composer\IO\IOInterface;
+use Composer\Plugin\Capable;
 use Composer\Plugin\PluginInterface;
 
 /**
@@ -14,7 +15,7 @@ use Composer\Plugin\PluginInterface;
  *
  * @package Rocket\Composer
  */
-class KernelPlugin implements PluginInterface
+class KernelPlugin implements PluginInterface, Capable
 {
 
     public function activate(Composer $composer, IOInterface $io)

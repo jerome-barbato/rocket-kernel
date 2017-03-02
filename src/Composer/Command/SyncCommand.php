@@ -33,7 +33,7 @@ EOT
         // Arguments checking
         if ( count( $args ) < 2)
         {
-            $FileManager->io->writeError( "  Not enough argument\n".
+            $this->getIO()->writeError( "  Not enough argument\n".
                 $FileManager->getComposerSyncDescription());
 
             return;
@@ -53,19 +53,19 @@ EOT
             // Preventing mistakes
             if ($current_env == 'local' && $env == 'production' && !(isset($options) && is_array($options) && in_array('force', $options)))
             {
-                $FileManager->io->writeError("  ERROR: We are very sorry but you cannot deploy to production from a local environment. \n  If you really want to, try force or -f option".$FileManager->getComposerSyncDescription());
+                $this->getIO()->writeError("  ERROR: We are very sorry but you cannot deploy to production from a local environment. \n  If you really want to, try force or -f option".$FileManager->getComposerSyncDescription());
                 return;
             }
 
-            $confirmed = $FileManager->io->askConfirmation( '  Please note that this will override current content in distant server. Continue ? [y,n] ', false);
+            $confirmed = $this->getIO()->askConfirmation( '  Please note that this will override current content in distant server. Continue ? [y,n] ', false);
 
             if ($confirmed)
-                $confirmed = $FileManager->io->askConfirmation( '  C\'mon.. Really ? [y,n] ', false);
+                $confirmed = $this->getIO()->askConfirmation( '  C\'mon.. Really ? [y,n] ', false);
 
         }
         elseif ($action != 'withdraw')
         {
-            $FileManager->io->writeError( "  Wrong action call\n".
+            $this->getIO()->writeError( "  Wrong action call\n".
                 "  action can be 'withdraw' or 'deploy' only.".$FileManager->getComposerSyncDescription());
 
             return;
@@ -90,7 +90,7 @@ EOT
             return;
         }
 
-        $FileManager->io->write( '  Abording process.' );
+        $this->getIO()->write( '  Abording process.' );
 
     }
 }
