@@ -9,6 +9,7 @@ use Composer\Composer;
 use Composer\Installer\PackageEvent;
 use Composer\IO\IOInterface;
 use Composer\Package\Package;
+use Composer\EventDispatcher\EventSubscriberInterface;
 use Composer\Plugin\Capable;
 use Composer\Plugin\PluginInterface;
 use Composer\Script\ScriptEvents;
@@ -19,11 +20,15 @@ use Rocket\System\FileManager;
  *
  * @package Rocket\Composer
  */
-class KernelPlugin implements PluginInterface, Capable
+class KernelPlugin implements PluginInterface, Capable, EventSubscriberInterface
 {
+    protected $composer;
+    protected $io;
 
     public function activate(Composer $composer, IOInterface $io)
     {
+        $this->composer = $composer;
+        $this->io       = $io;
 
     }
 
@@ -74,7 +79,7 @@ class KernelPlugin implements PluginInterface, Capable
                 {
 
                     /** @var FileManager $fm */
-                    $fm = FileManager::getInstance( $event );
+                    $fm = FileManager::getInstance( $this->io );
 
                     if ( method_exists( $fm, $action ) )
                     {
@@ -86,15 +91,13 @@ class KernelPlugin implements PluginInterface, Capable
                         } catch ( \Exception $e )
                         {
 
-                            $event->getIO()
-                                  ->writeError( "<error>Error: " . $action . " action on " . $installedPackage->getName() . " : \n" . $e->getMessage() . "</error>" );
+                            $this->io->writeError( "<error>Error: " . $action . " action on " . $installedPackage->getName() . " : \n" . $e->getMessage() . "</error>" );
                         }
                     }
                     else
                     {
 
-                        $event->getIO()
-                              ->writeError( "<warning> Skipping extra folder action : " . $action . ", method does not exist.</warning>" );
+                        $this->io->writeError( "<warning> Skipping extra folder action : " . $action . ", method does not exist.</warning>" );
                     }
                 }
 
