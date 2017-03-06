@@ -7,7 +7,7 @@ namespace Rocket\Composer\Command;
 
 
 use Composer\Command\BaseCommand;
-use Customer\Composer\System\FileManager;
+use Rocket\System\SyncManager;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -26,15 +26,14 @@ EOT
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        /** @var FileManager $FileManager */
-        $FileManager  = FileManager::getInstance( $this->getIO() );
+        /** @var SyncManager $SyncManager */
+        $SyncManager = SyncManager::getInstance( $this->getIO() );
         $args   = $input->getArgument('actions');
 
         // Arguments checking
         if ( count( $args ) < 2)
         {
-            $this->getIO()->writeError( "  Not enough argument\n".
-                $FileManager->getComposerSyncDescription());
+            $this->getIO()->writeError( "  Not enough argument\n". $SyncManager->getComposerSyncDescription() );
 
             return;
         }
@@ -47,13 +46,14 @@ EOT
 
         if ($action == 'deploy')
         {
-            $FileManager->loadConfig();
-            $current_env = $FileManager->getConfig()->get('environment');
+            $SyncManager->loadConfig();
+            $current_env = $SyncManager->getConfig()->get( 'environment' );
 
             // Preventing mistakes
             if ($current_env == 'local' && $env == 'production' && !(isset($options) && is_array($options) && in_array('force', $options)))
             {
-                $this->getIO()->writeError("  ERROR: We are very sorry but you cannot deploy to production from a local environment. \n  If you really want to, try force or -f option".$FileManager->getComposerSyncDescription());
+                $this->getIO()
+                     ->writeError( "  ERROR: We are very sorry but you cannot deploy to production from a local environment. \n  If you really want to, try force or -f option" . $SyncManager->getComposerSyncDescription() );
                 return;
             }
 
@@ -65,8 +65,7 @@ EOT
         }
         elseif ($action != 'withdraw')
         {
-            $this->getIO()->writeError( "  Wrong action call\n".
-                "  action can be 'withdraw' or 'deploy' only.".$FileManager->getComposerSyncDescription());
+            $this->getIO()->writeError( "  Wrong action call\n". "  action can be 'withdraw' or 'deploy' only." . $SyncManager->getComposerSyncDescription() );
 
             return;
         }
@@ -78,13 +77,13 @@ EOT
             if (!$options || in_array('only-file', $options))
             {
                 // Starting Sync
-                $FileManager->FileManagerync( $action, $env );
+                $SyncManager->SyncManagerync( $action, $env );
             }
 
             if (!$options || in_array('only-database', $options))
             {
                 // Starting Database Import
-                $FileManager->databaseSync( $action, $env );
+                $SyncManager->databaseSync( $action, $env );
             }
 
             return;
