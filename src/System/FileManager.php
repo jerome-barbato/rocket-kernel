@@ -28,9 +28,9 @@ class FileManager {
     /**
      * FileManager constructor.
      *
-     * @param Event $event
+     * @param IOInterface $io
      */
-    public function __construct($io)
+    public function __construct(IOInterface $io)
     {
         $this->io    = $io;
     }

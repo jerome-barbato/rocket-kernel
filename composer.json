@@ -31,9 +31,6 @@
       "Rocket\\": "src/"
     }
   },
-  "scripts": {
-    "post-package-install": "Rocket\\Composer\\Installer::install"
-  },
   "extra": {
     "class": "Rocket\\Composer\\KernelPlugin"
   }
