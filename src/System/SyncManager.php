@@ -13,20 +13,21 @@ use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 
 /**
- * Class FileManager
+ * Class SyncManager
  *
  * File Manager
  *
  * @package Rocket\System
  */
-class FileManager {
+class SyncManager
+{
 
     use SingletonTrait;
 
     private $io, $config;
 
     /**
-     * FileManager constructor.
+     * SyncManager constructor.
      *
      * @param IOInterface $io
      */
@@ -90,79 +91,6 @@ class FileManager {
     }
 
     /**
-     * File Copy
-     *
-     * @param Event $event
-     */
-    public function copy($files, $package, $io)
-    {
-        $finder = new Finder;
-        $fs     = new FileSystem();
-        $sfs    = new \Symfony\Component\Filesystem\Filesystem();
-        $packageDir = 'vendor' . DIRECTORY_SEPARATOR . $package->getName();
-
-        foreach ( $files as $from => $to )
-        {
-            if ( $fs->isAbsolutePath( $from ) )
-            {
-                throw new \InvalidArgumentException( "Invalid target path '$from' for package'{$package->getName()}'." . ' It must be relative.' );
-            }
-
-            if ( $fs->isAbsolutePath( $to ) )
-            {
-                throw new \InvalidArgumentException( "Invalid link path '$to' for package'{$package->getName()}'." . ' It must be relative.' );
-            }
-
-            $from = $packageDir . DIRECTORY_SEPARATOR . $from;
-            $to   = getcwd() . DIRECTORY_SEPARATOR . $to;
-
-            $fs->ensureDirectoryExists( dirname( $to ) );
-
-            if ( is_dir( $from ) )
-            {
-                $finder->FileManager()->in( $from );
-
-                foreach ( $finder as $file )
-                {
-                    $dest = sprintf( '%s/%s', $to, $file->getRelativePathname() );
-
-                    try
-                    {
-                        if ( file_exists( $dest ) )
-                        {
-                            $fs->unlink( $dest );
-                        }
-
-                        $sfs->copy( $file, $dest );
-
-                    } catch ( IOException $e )
-                    {
-                        throw new \InvalidArgumentException( sprintf( '<error>Could not copy %s</error>', $file->getBaseName() . " \n" . $e->getMessage() ) );
-                    }
-                }
-            }
-            else
-            {
-                try
-                {
-
-                    if ( file_exists( $to ) )
-                        $fs->unlink( $to );
-
-                    $sfs->copy( $from, $to );
-
-                    $io->write( sprintf( '  Copying <comment>%s</comment> to <comment>%s</comment>.', str_replace( getcwd(), '', $from ), str_replace( getcwd(), '', $to ) ) );
-
-                }
-                catch ( IOException $e )
-                {
-                    throw new \InvalidArgumentException( sprintf( '<error>Could not copy %s</error>', $from. " \n" . $e->getMessage() ) );
-                }
-            }
-        }
-    }
-
-    /**
      * @param Event $event
      * @param       $id
      * @return array
@@ -180,129 +108,13 @@ class FileManager {
     }
 
     /**
-     * Folder removal
-     *
-     * @param Event $event
-     */
-    public function remove($files, $package, $io)
-    {
-        $fs  = new FileSystem();
-
-        foreach ( $files as $file )
-        {
-            if ( $fs->isAbsolutePath( $file ) )
-            {
-                throw new \InvalidArgumentException( "Invalid target path '$file' for package'{$package->getName()}'." . ' It must be relative.' );
-            }
-
-            $file = getcwd() . DIRECTORY_SEPARATOR . $file;
-
-            try
-            {
-                if ( is_dir( $file ) )
-                {
-                    $fs->removeDirectory( $file );
-                    $io->write( sprintf( '  Removing directory <comment>%s</comment>.', str_replace( getcwd(), '', $file ) ) );
-                }
-                elseif ( file_exists( $file ) )
-                {
-                    $fs->unlink( $file );
-                    $io->write( sprintf( '  Removing file <comment>%s</comment>.', str_replace( getcwd(), '', $file ) ) );
-                }
-
-
-            } catch ( IOException $e )
-            {
-                throw new \InvalidArgumentException( sprintf( '<error>Could not remove %s</error>', $file ) );
-            }
-        }
-    }
-
-    /**
-     * Folder Creation
-     *
-     * @param array $files
-     * @param Package $package
-     */
-    public function create($files, $package, $io)
-    {
-        $fs = new Filesystem();
-        foreach ( $files as $file => $permissions ) {
-
-            if ( $fs->isAbsolutePath( $file ) ) {
-
-                throw new \InvalidArgumentException( "Invalid target path '$file' It must be relative." );
-            }
-
-            $file = getcwd() . DIRECTORY_SEPARATOR . $file;
-
-            try {
-
-                if ( !is_dir( $file ) && !file_exists( $file ) ) {
-
-                    $io->write( sprintf( '  Creating directory <comment>%s</comment>.', str_replace( getcwd(), '', $file ) ) );
-
-                    $oldmask = umask( 0 );
-                    mkdir( $file, octdec( $permissions ) );
-                    umask( $oldmask );
-                }
-            } catch ( IOException $e ) {
-
-                throw new \InvalidArgumentException( sprintf( '<error>Could not create %s</error>', $e ) );
-            }
-        }
-    }
-
-
-    /**
-     * @param array $files
-     * @param Package $package
-     * @param IOInterface $io
-     */
-    public function symlink($files, $package, $io)
-    {
-        $fs = new Filesystem();
-        $packageDir = DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . $package->getName();
-
-        foreach ( $files as $target => $link ) {
-
-            if ( $fs->isAbsolutePath( $target ) ) {
-
-                throw new \InvalidArgumentException( "Invalid symlink target path '$target' for package '{$package->getName()}'." . ' It must be relative.' );
-            }
-
-            if ( $fs->isAbsolutePath( $link ) ) {
-
-                throw new \InvalidArgumentException( "Invalid symlink link path '$link' for package '{$package->getName()}'." . ' It must be relative.' );
-            }
-
-            $targetPath = getcwd() . $packageDir . DIRECTORY_SEPARATOR . $target;
-            $linkPath   = getcwd() . DIRECTORY_SEPARATOR . $link;
-
-            if ( !file_exists( $targetPath ) ) {
-
-                throw new \RuntimeException( "The target path '$targetPath' for package'{$package->getName()}' does not exist." );
-            }
-
-            if ( !file_exists( $linkPath ) ) {
-
-                $io->write( sprintf( "  Symlinking <comment>%s</comment> to <comment>%s</comment>", str_replace( getcwd(), '', $targetPath ), str_replace( getcwd(), '', $linkPath ) ) );
-
-                $fs->ensureDirectoryExists( dirname( $linkPath ) );
-                $fs->relativeSymlink( $targetPath, $linkPath );
-
-            }
-        }
-    }
-
-
-    /**
-     * Import folders and FileManager to a specific destination according to remote.yml configuration.
+     * Import folders and SyncManager to a specific destination according to remote.yml configuration.
      * BE CAREFUL WITH THIS FUNCTION
-     * @param string $direction 'withdraw' | 'deploy'
+     *
+*@param string $direction 'withdraw' | 'deploy'
      * @param string $env 'production' | 'staging'
      */
-    public function FileManagerync($direction, $env)
+    public function SyncManagerync($direction, $env)
     {
         $this->loadConfig();
         $remote_cfg = $this->config->get($env . '.ssh');
@@ -417,8 +229,9 @@ class FileManager {
 
 
     /**
-     * Retrieve configuration from app/config Yaml FileManager
-     * @return Data
+     * Retrieve configuration from app/config Yaml SyncManager
+     *
+*@return Data
      */
     public function loadConfig()
     {
