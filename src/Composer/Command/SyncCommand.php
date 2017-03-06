@@ -7,7 +7,7 @@ namespace Rocket\Composer\Command;
 
 
 use Composer\Command\BaseCommand;
-use Rocket\System\FileManager;
+use Customer\Composer\System\FileManager;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;

@@ -6,12 +6,9 @@
 namespace Rocket\Composer\Command;
 
 use Composer\Command\BaseCommand;
-use Composer\IO\IOInterface;
 use Rocket\System\Database;
-use Symfony\Component\Console\Helper\DialogHelper;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class DatabaseCommand extends BaseCommand
