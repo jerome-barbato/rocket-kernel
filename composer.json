@@ -32,6 +32,9 @@
     }
   },
   "extra": {
-    "class": "Rocket\\Composer\\KernelPlugin"
+    "class": "Rocket\\Composer\\KernelPlugin",
+    "branch-alias": {
+      "dev-dev": "1.1.x-dev"
+    }
   }
 }
