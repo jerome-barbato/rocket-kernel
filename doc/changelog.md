@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-# 1.1.0 - IN DEV
+# 1.1.0 - 2017-03-14
 ### Added
 * Database class can now import from compressed archive.
 * File class can now perform deployment or withdrawal.
