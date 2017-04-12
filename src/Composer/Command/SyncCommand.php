@@ -19,9 +19,12 @@ class SyncCommand extends BaseCommand
         $this->setName('sync');
         $this->addArgument('actions', InputArgument::IS_ARRAY, "Modules");
         $this->setHelp(<<<EOT
-
+    Perform specific deployment and withdrawal action with remote machines. \n
+    This commands must use rocket boilerplate framework.
 EOT
         );
+
+        $this->setDescription("CI - CD for Metabolism boilerplate");
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
