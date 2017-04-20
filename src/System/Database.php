@@ -5,7 +5,7 @@
 
 namespace Rocket\System;
 
-use Composer\Script\Event;
+use Composer\IO\IOInterface;
 use Dflydev\DotAccessData\Data;
 use Rocket\Application\SingletonTrait;
 
@@ -18,11 +18,6 @@ use Rocket\Application\SingletonTrait;
 class Database {
 
     use SingletonTrait;
-
-    /** @var Files $files */
-    private $files;
-    /** @var Event $event */
-    private $event;
     /** @var IOInterface $io */
     private $io;
     /** @var Data $config */
@@ -34,12 +29,9 @@ class Database {
      *
      * @param Event $event
      */
-    public function __construct(Event $event)
+    public function __construct(IOInterface $io)
     {
-
-        $this->files = new Files( $event );
-        $this->event = $event;
-        $this->io    = $event->getIO();
+        $this->io    = $io;
 
         $this->loadConfig();
     }
@@ -71,47 +63,6 @@ class Database {
         }
 
         $this->config = new Data( $data );
-    }
-
-    public static function handle(Event $event)
-    {
-        /** @var Database $database */
-        $database = Database::getInstance( $event );
-        $args     = $event->getArguments();
-
-        if ( !count( $args ) ) {
-
-            $database->io->writeError( $database->getComposerDatabaseDescription() );
-
-            return;
-        }
-
-        $action = $args[0];
-
-        if ( $action != 'import' && $action != 'export' ) {
-
-            $database->io->writeError( "  Wrong action call\n" . "  action can be 'import' or 'export' only." . $database->getComposerDatabaseDescription() );
-
-            return;
-        }
-
-        if ( $action == 'import' && count( $args ) < 2 ) {
-
-            $database->io->writeError( "  Missing path argument\n" . $database->getComposerDatabaseDescription() );
-
-            return;
-        }
-
-        $archive_info = $args[1];
-
-        try {
-
-            $database->prepare( $action, $archive_info );
-
-        } catch ( \Exception $e ) {
-
-            $database->io->write( "  ERROR : " . $e->getMessage() );
-        }
     }
 
     /**
