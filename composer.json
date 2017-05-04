@@ -1,6 +1,6 @@
 {
   "name": "metabolism/rocket-kernel",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "type": "composer-plugin",
   "license": "AGPL-3.0",
   "authors": [
@@ -18,7 +18,8 @@
     "php": ">=5.5.0",
     "composer-plugin-api": "^1.0",
     "mustangostang/spyc": "^0.6.1",
-    "dflydev/dot-access-data": "^1.0"
+    "dflydev/dot-access-data": "^1.0",
+    "curl/curl": "^1.5"
   },
   "require-dev": {
     "composer/composer": "1.0.*@dev",
@@ -34,8 +35,7 @@
   "extra": {
     "class": "Rocket\\Composer\\KernelPlugin",
     "branch-alias": {
-      "dev-1.0.x": "1.0.x-dev",
-      "dev-1.1.x": "1.1.x-dev"
+      "dev-dev": "1.1.x-dev"
     }
   }
 }

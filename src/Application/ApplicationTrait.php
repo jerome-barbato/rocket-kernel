@@ -7,6 +7,8 @@
 namespace Rocket\Application;
 
 use Dflydev\DotAccessData\Data as DotAccessData;
+use Rocket\Helper\DataRetriever;
+
 
 /**
  * Class ApplicationTrait
@@ -97,4 +99,85 @@ trait ApplicationTrait {
 
         return $this->config;
     }
+
+	/**
+	 * Load Local JSON Data
+	 * @param $file
+	 * @param bool $offset
+	 * @param bool $process
+	 * @return array
+	 */
+	protected function getLocalData($file, $offset = false, $process = false)
+	{
+		$data = new DataRetriever( $this->config );
+		return $data->getLocal( $file, $offset, $process );
+	}
+
+
+	/**
+	 * Load Remote JSON Data
+	 * @param $file
+	 * @param bool $offset
+	 * @param bool $process
+	 * @return array
+	 */
+	protected function getRemoteData($file, $offset = false, $process = false)
+	{
+		$retriever = new DataRetriever( $this->config );
+		return $retriever->getRemote( $file, $offset, $process );
+	}
+
+	/**
+	 * Download file
+	 * @param $remote_file
+	 * @param $local_file
+	 * @return bool
+	 */
+	protected function downloadFile($remote_file, $local_file)
+	{
+		$retriever = new DataRetriever( $this->config );
+		return $retriever->download( $remote_file, $local_file );
+	}
+
+	/**
+	 * @param $path
+	 * @param string $extensions
+	 * @return array
+	 */
+	public function listFiles($path, $extensions="*.*")
+	{
+		$path  = rtrim($path, '/').'/';
+		$paths = glob($path . "*", GLOB_MARK | GLOB_ONLYDIR | GLOB_NOSORT);
+		$files = glob($path . $extensions);
+
+		foreach ($paths as $key => $path)
+		{
+			$directory = explode("/", $path);
+			unset($directory[count($directory) - 1]);
+			$directories[end($directory)] = $this->listFiles($path, $extensions);
+
+			foreach ($files as $file)
+			{
+				if (strpos(substr($file, 2), ".") !== false){
+
+					$filename = preg_replace('/\\.[^.\\s]{3,5}/', '', substr($file, (strrpos($file, "/") + 1)));
+
+					if( !in_array($filename, $directories) )
+						$directories[] = $filename;
+				}
+			}
+		}
+
+		if (isset($directories))
+		{
+			return $directories;
+		}
+		else
+		{
+			$files2return = [];
+			foreach ($files as $key => $file)
+				$files2return[] = preg_replace('/\\.[^.\\s]{3,5}/', '', substr($file, (strrpos($file, "/") + 1)));
+			return $files2return;
+		}
+	}
 }
