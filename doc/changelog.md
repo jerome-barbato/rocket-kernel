@@ -4,9 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-# 1.1.2 - 2017-05-09
+# 1.1.2 - IN DEV
 ### Added
 * Fix listFiles
+### Changed
+* Updated SingletonTrait Doc for a right autocompletion.
 
 # 1.1.1 - 2017-05-04
 ### Added

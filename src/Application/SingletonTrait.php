@@ -16,7 +16,7 @@ trait SingletonTrait {
     /**
      * Instance
      *
-     * @var Singleton
+     * @var self
      */
     protected static $_instance;
 
@@ -29,7 +29,7 @@ trait SingletonTrait {
     /**
      * Get instance
      *
-     * @return Singleton
+     * @return self
      */
     public static function getInstance()
     {
