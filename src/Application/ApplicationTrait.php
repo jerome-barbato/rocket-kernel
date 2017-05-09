@@ -147,8 +147,8 @@ trait ApplicationTrait {
 	public function listFiles($path, $extensions="*.*")
 	{
 		$path  = rtrim($path, '/').'/';
-		$paths = glob($path . "*", GLOB_MARK | GLOB_ONLYDIR | GLOB_NOSORT);
-		$files = glob($path . $extensions);
+		$paths = glob(BASE_URI.$path . "*", GLOB_MARK | GLOB_ONLYDIR | GLOB_NOSORT);
+		$files = glob(BASE_URI.$path . $extensions);
 
 		foreach ($paths as $key => $path)
 		{
