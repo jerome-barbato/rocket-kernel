@@ -60,6 +60,14 @@ trait ApplicationTrait {
         return BASE_PATH . '/upload' . $file;
     }
 
+    /**
+     * Return upload url like in TWIG
+     */
+    public function base_url()
+    {
+        return BASE_PATH;
+    }
+
     abstract protected function registerRoutes();
 
     protected function registerServicesProvider() { }
