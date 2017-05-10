@@ -162,7 +162,7 @@ trait ApplicationTrait {
 		{
 			$directory = explode("/", $path);
 			unset($directory[count($directory) - 1]);
-			$directories[end($directory)] = $this->listFiles($path, $extensions);
+			$directories[end($directory)] = $this->listFiles(str_replace(BASE_URI, '', $path), $extensions);
 
 			foreach ($files as $file)
 			{
