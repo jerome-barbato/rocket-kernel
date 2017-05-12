@@ -17,96 +17,113 @@ use Rocket\Helper\DataRetriever;
  */
 trait ApplicationTrait {
 
-    /** @var $config DotAccessData */
-    public $paths, $config;
+	/** @var $config DotAccessData */
+	public $paths, $config;
 
-    /**
-     * Start Customer Application to rely framework.
-     */
-    public static function load()
-    {
-        new \Customer\Application();
-    }
 
-    /**
-     * Define generic path for project.
-     *
-     * @return array
-     */
-    public function getPaths()
-    {
+	/**
+	 * Start Customer Application to rely framework.
+	 */
+	public static function load()
+	{
+		new \Customer\Application();
+	}
 
-        $this->paths = [
-            'config' => BASE_URI . '/app/config',
-            'views'  => BASE_URI . '/app/views'
-        ];
 
-        return $this->paths;
-    }
+	/**
+	 * Define generic path for project.
+	 *
+	 * @return array
+	 */
+	public function getPaths()
+	{
 
-    /**
-     * Return asset url like in TWIG
-     */
-    public function asset_url($file)
-    {
-        return BASE_PATH . '/public' . $file;
-    }
+		$this->paths = [
+			'config'    => BASE_URI . '/app/config',
+			'views'     => BASE_URI . '/app/views',
+			'resources' => BASE_URI . '/app/resources'
+		];
 
-    /**
-     * Return upload url like in TWIG
-     */
-    public function upload_url($file)
-    {
-        return BASE_PATH . '/upload' . $file;
-    }
+		return $this->paths;
+	}
 
-    /**
-     * Return upload url like in TWIG
-     */
-    public function base_url()
-    {
-        return BASE_PATH;
-    }
 
-    abstract protected function registerRoutes();
+	/**
+	 * Return asset url like in TWIG
+	 */
+	public function asset_url($file)
+	{
+		return BASE_PATH . '/public' . $file;
+	}
 
-    protected function registerServicesProvider() { }
+	/**
+	 * Return upload url like in TWIG
+	 */
+	public function upload_url($file)
+	{
+		return BASE_PATH . '/upload' . $file;
+	}
 
-    /**
-     * YML Config loader
-     * Will automatically load global and local config
-     *
-     * @param array $additional_yml
-     * @return DotAccessData|mixed
-     * @internal param array $added_configs given values will be added after global and before local configuration files.
-     */
-    protected function getConfig($additional_yml = [])
-    {
+	abstract protected function registerRoutes();
 
-        $yml_names   = ['global'];
-        $yml_names[] = $additional_yml;
-        $yml_names[] = 'local';
+	protected function registerServicesProvider() { }
 
-        $data = [];
-        foreach ( $yml_names as $yml_name ) {
 
-            $file = $this->paths['config'] . '/' . $yml_name . '.yml';
+	/**
+	 * YML Config loader
+	 * Will automatically load global and local config
+	 *
+	 * @param array $additional_yml
+	 * @return DotAccessData|mixed
+	 * @internal param array $added_configs given values will be added after global and before local configuration files.
+	 */
+	protected function getConfig($additional_yml = [])
+	{
+		$yml_names   = ['global'];
+		$yml_names[] = $additional_yml;
+		$yml_names[] = 'local';
 
-            if ( file_exists( $file ) ) {
-                $data = array_merge( $data, \Spyc::YAMLLoad( $file ) );
-            }
-        }
+		$data = [];
+		foreach ( $yml_names as $yml_name ) {
 
-        $config = new DotAccessData( $data );
+			$file = $this->paths['config'] . '/' . $yml_name . '.yml';
 
-        if ( $config->get( 'environment', 'production' ) == "production" ) {
-            $config->set( 'debug', false );
-        }
+			if ( file_exists( $file ) )
+				$data = array_merge( $data, \Spyc::YAMLLoad( $file ) );
+		}
 
-        $this->config = $config;
+		$config = new DotAccessData( $data );
 
-        return $this->config;
-    }
+		if ( $config->get( 'environment', 'production' ) == "production" ) {
+			$config->set( 'debug', false );
+		}
+
+		$this->config = $config;
+
+		return $this->config;
+	}
+
+
+	protected function getPageStatus( $path )
+	{
+		$file = $this->paths['resources'] . '/status.yml';
+
+		if ( file_exists( $file ) )
+		{
+			$data  = new DotAccessData( \Spyc::YAMLLoad( $file ));
+			$route = str_replace( '/', '.', trim( str_replace( BASE_PATH, '', $path ), '/'));
+
+			if( empty($route) )
+				$route = 'index';
+
+			return $data->get($route);
+		}
+		else
+		{
+			return false;
+		}
+	}
+
 
 	/**
 	 * Load Local JSON Data
@@ -135,6 +152,7 @@ trait ApplicationTrait {
 		return $retriever->getRemote( $file, $offset, $process );
 	}
 
+
 	/**
 	 * Download file
 	 * @param $remote_file
@@ -146,6 +164,7 @@ trait ApplicationTrait {
 		$retriever = new DataRetriever( $this->config );
 		return $retriever->download( $remote_file, $local_file );
 	}
+
 
 	/**
 	 * @param $path
