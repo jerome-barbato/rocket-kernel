@@ -46,6 +46,15 @@ trait ApplicationTrait {
 
 		return $this->paths;
 	}
+	
+	
+	/**
+	 * Return base url like in TWIG
+	 */
+	public function base_url()
+	{
+		return BASE_PATH;
+	}
 
 
 	/**
@@ -55,6 +64,7 @@ trait ApplicationTrait {
 	{
 		return BASE_PATH . '/public' . $file;
 	}
+
 
 	/**
 	 * Return upload url like in TWIG
