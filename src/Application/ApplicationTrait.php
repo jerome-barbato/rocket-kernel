@@ -49,12 +49,22 @@ trait ApplicationTrait {
 
 
 	/**
+	 * Return base url like in TWIG
+	 */
+	public function base_url()
+	{
+		return BASE_PATH;
+	}
+
+
+	/**
 	 * Return asset url like in TWIG
 	 */
 	public function asset_url($file)
 	{
 		return BASE_PATH . '/public' . $file;
 	}
+
 
 	/**
 	 * Return upload url like in TWIG

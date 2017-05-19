@@ -11,6 +11,6 @@ class KernelCommandProvider implements CommandProviderCapability
 {
     public function getCommands()
     {
-        return array(new SyncCommand(), new DatabaseCommand());
+        return [new SyncCommand(), new DatabaseCommand(), new StyleguideCommand(), new CleanupCommand()];
     }
 }
