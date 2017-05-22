@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+# 1.1.5 - 2017-05-22
+### Fixed
+* base_url function double declaration
+
+# 1.1.4 - 2017-05-19
+### Added
+* moved styleguide and database functions from boilerplate to kernel 
+
 # 1.1.3 - 2017-05-12
 ### Added
 * get page status function
