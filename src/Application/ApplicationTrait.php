@@ -7,6 +7,7 @@
 namespace Rocket\Application;
 
 use Dflydev\DotAccessData\Data as DotAccessData;
+use Rocket\Helper\DataRetriever;
 
 /**
  * Class ApplicationTrait
@@ -36,7 +37,8 @@ trait ApplicationTrait {
 
         $this->paths = [
             'config' => BASE_URI . '/app/config',
-            'views'  => BASE_URI . '/app/views'
+            'views'  => BASE_URI . '/app/views',
+            'resources' => BASE_URI . '/app/resources'
         ];
 
         return $this->paths;
@@ -97,4 +99,37 @@ trait ApplicationTrait {
 
         return $this->config;
     }
+
+	protected function getPageStatus( $path )
+	{
+		$file = $this->paths['resources'] . '/status.yml';
+
+		if ( file_exists( $file ) )
+		{
+			$data  = new DotAccessData( \Spyc::YAMLLoad( $file ));
+			$route = str_replace( '/', '.', trim( str_replace( BASE_PATH, '', $path ), '/'));
+
+			if( empty($route) )
+				$route = 'index';
+
+			return $data->get($route);
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	/**
+	 * Load Local JSON Data
+	 * @param $file
+	 * @param bool $offset
+	 * @param bool $process
+	 * @return array
+	 */
+	protected function getLocalData($file, $offset = false, $process = false)
+	{
+		$data = new DataRetriever( $this->config );
+		return $data->getLocal( $file, $offset, $process );
+	}
 }

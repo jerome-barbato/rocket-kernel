@@ -1,6 +1,6 @@
 {
   "name": "metabolism/rocket-kernel",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "type": "composer-plugin",
   "license": "AGPL-3.0",
   "authors": [
