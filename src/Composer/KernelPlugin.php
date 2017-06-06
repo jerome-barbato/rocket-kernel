@@ -13,7 +13,6 @@ use Composer\EventDispatcher\EventSubscriberInterface;
 use Composer\Plugin\Capable;
 use Composer\Plugin\PluginInterface;
 use Composer\Script\ScriptEvents;
-use Rocket\System\FileManager;
 
 /**
  * Class KernelPlugin

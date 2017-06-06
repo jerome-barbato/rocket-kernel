@@ -5,9 +5,9 @@ namespace Rocket\Helper;
 use Dflydev\DotAccessData\Data as DotAccessData;
 
 /**
- * Class FileManager
+ * Class Parser
  *
- * File Manager
+ * Parser
  *
  * @package Rocket\Parser
  */
