@@ -26,7 +26,7 @@ trait ApplicationTrait {
 	 */
 	public static function load()
 	{
-		new \AppBundle\Application();
+		new \FrontBundle\Application();
 	}
 
 
