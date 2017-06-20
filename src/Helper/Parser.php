@@ -77,7 +77,7 @@ class Parser
                 foreach($value as $font)
                 {
                     $font = explode(' ', trim(preg_replace('/\s+/', ' ',$font)));
-                    if( $font[0] != 'Icons' )
+                    if( strtolower($font[0]) != 'icons' )
                         $data['fonts'][$font[0]][] = ['variant'=>str_replace('Italic','',$font[1]), 'weight'=>$font[2], 'style'=>$font[3], 'stretch'=>$font[4]];
                 }
             }

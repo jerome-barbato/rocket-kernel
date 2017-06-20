@@ -4,7 +4,7 @@
  */
 
 
-namespace Rocket\Application;
+namespace Rocket\Traits;
 
 /**
  * Class SingletonTrait

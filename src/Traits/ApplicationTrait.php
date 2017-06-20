@@ -4,7 +4,7 @@
  * User: Paul Coudeville <paul@metabolism.fr>
  */
 
-namespace Rocket\Application;
+namespace Rocket\Traits;
 
 use Dflydev\DotAccessData\Data as DotAccessData;
 use Rocket\Helper\DataRetriever;
@@ -26,7 +26,7 @@ trait ApplicationTrait {
 	 */
 	public static function load()
 	{
-		new \Customer\Application();
+		new \AppBundle\Application();
 	}
 
 
@@ -40,8 +40,8 @@ trait ApplicationTrait {
 
 		$this->paths = [
 			'config'    => BASE_URI . '/app/config',
-			'views'     => BASE_URI . '/app/views',
-			'resources' => BASE_URI . '/app/resources'
+			'status'    => BASE_URI . '/app/Resources/status.yml',
+			'views'     => BASE_URI . '/app/Resources/views'
 		];
 
 		return $this->paths;
@@ -116,11 +116,9 @@ trait ApplicationTrait {
 
 	protected function getPageStatus( $path )
 	{
-		$file = $this->paths['resources'] . '/status.yml';
-
-		if ( file_exists( $file ) )
+		if ( file_exists( $this->paths['status'] ) )
 		{
-			$data  = new DotAccessData( \Spyc::YAMLLoad( $file ));
+			$data  = new DotAccessData( \Spyc::YAMLLoad( $this->paths['status'] ));
 			$route = str_replace( '/', '.', trim( str_replace( BASE_PATH, '', $path ), '/'));
 
 			if( empty($route) )
