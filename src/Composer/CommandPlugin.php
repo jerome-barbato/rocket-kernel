@@ -19,7 +19,7 @@ use Composer\Script\ScriptEvents;
  *
  * @package Rocket\Composer
  */
-class ComposerPlugin implements PluginInterface, Capable
+class CommandPlugin implements PluginInterface, Capable
 {
     protected $composer;
     protected $io;
