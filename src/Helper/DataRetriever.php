@@ -9,7 +9,7 @@ namespace Rocket\Helper;
 use Curl\Curl;
 
 
-class DataRetrieverHelper {
+class DataRetriever {
 
     private $config, $error;
 
