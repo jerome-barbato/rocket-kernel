@@ -70,7 +70,7 @@ class DataRetriever {
     public function getLocal($file, $offset = false, $process = false)
     {
 
-        $file = BASE_URI . $this->config->get( 'data.local.path', '/app/resources/dico' ) . $file;
+        $file = BASE_URI . $this->config->get( 'data.local.path', '/app/Resources/dico' ) . $file;
 
         if ( file_exists( $file ) ) {
 
