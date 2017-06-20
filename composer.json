@@ -34,7 +34,7 @@
     }
   },
   "extra": {
-    "class": "Rocket\\Composer\\ComposerPlugin",
+    "class": "Rocket\\Composer\\CommandPlugin",
     "branch-alias": {
       "dev-1.2.x": "1.2.x-dev",
       "dev-1.1.x": "1.1.x-dev"
