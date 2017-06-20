@@ -31,8 +31,8 @@ class Parser
             $builder = \Spyc::YAMLLoad($this->paths['builder']);
             $config = new DotAccessData($builder);
 
-            $this->paths['asset'] = trim($config->get('paths.asset', 'app/resources'), '/');
-            $this->paths['public'] = trim($config->get('paths.public', 'web/static'), '/');
+            $this->paths['asset'] = trim($config->get('paths.asset', '/src/FrontBundle/Resources/private'), '/');
+            $this->paths['public'] = trim($config->get('paths.public', '/src/FrontBundle/Resources/public'), '/');
         }
         else
         {
@@ -59,10 +59,9 @@ class Parser
     {
         $data = [];
 
-        $asset_path = $this->paths['asset'].'/sass/app';
         $public_path = $this->paths['public'].'/css';
 
-        $variables = $this->find([$asset_path.'/config.scss', $asset_path.'/environment.scss'], '/\$(.*?)\s*?:\s*?(.*?)\s*?;/sm');
+        $variables = $this->find([$this->paths['asset'].'/config/env.scss', $this->paths['asset'].'/config/var.scss'], '/\$(.*?)\s*?:\s*?(.*?)\s*?;/sm');
 
         foreach($variables as $name=>$value)
         {
