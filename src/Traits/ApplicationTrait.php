@@ -40,8 +40,8 @@ trait ApplicationTrait {
 
 		$this->paths = [
 			'config'    => BASE_URI . '/app/config',
-			'status'    => BASE_URI . '/app/Resources/status.yml',
-			'views'     => BASE_URI . '/app/Resources/views'
+			'status'    => BASE_URI . '/app/status.yml',
+			'views'     => BASE_URI . '/app/views'
 		];
 
 		return $this->paths;
