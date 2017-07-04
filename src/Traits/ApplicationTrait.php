@@ -143,7 +143,30 @@ trait ApplicationTrait {
 	protected function getLocalData($file, $offset = false, $process = false)
 	{
 		$data = new DataRetriever( $this->config );
+		//implement editablecontent injection
 		return $data->getLocal( $file, $offset, $process );
+	}
+
+
+	/**
+	 * Load Local JSON Data
+	 *
+	 * @param $file
+	 * @param $node_id
+	 * @param $value
+	 * @return bool
+	 */
+	protected function setLocalData($file, $node_id, $value)
+	{
+		$data = new DataRetriever( $this->config );
+		$content = new DotAccessData($data->getLocal($file));
+
+		$content->set($node_id, $value);
+
+		print_r($content->export());
+		die();
+
+		return $data->setLocal( $file, $content->export() );
 	}
 
 

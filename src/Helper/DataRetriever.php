@@ -91,16 +91,6 @@ class DataRetriever {
 
                 if ( $content and !is_null( $content ) ) {
 
-                    //Wordpress compatibility
-
-                    if ( isset( $content['head'] ) and is_array( $content['head'] ) ) {
-                        $content['head'] = implode( ' ', $content['head'] );
-                    }
-
-                    if ( isset( $content['footer'] ) and is_array( $content['footer'] ) ) {
-                        $content['footer'] = implode( ' ', $content['footer'] );
-                    }
-
                     return $this->offset( $content, $offset );
                 }
             }
@@ -108,6 +98,29 @@ class DataRetriever {
 
         return [];
     }
+
+
+    /**
+     * Set Local JSON Data Node
+     */
+    public function setLocal($file, $content)
+    {
+        $file = BASE_URI . $this->config->get( 'data.local.path', '/app/dico' ) . $file;
+
+        if ( file_exists( $file ) ) {
+
+	        $content = @json_encode( $content );
+
+	        if ( json_last_error() != JSON_ERROR_NONE )
+		        return false;
+
+	        if ( @file_put_contents( $file, $content ) )
+	        	return true;
+        }
+
+        return false;
+    }
+
 
     private function replace($replace, $content)
     {
