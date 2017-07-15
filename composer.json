@@ -20,7 +20,7 @@
     "mustangostang/spyc": "^0.6.1",
     "dflydev/dot-access-data": "^1.0",
     "curl/curl": "^1.5",
-    "metabolism/rocket-installer": "1.0.x"
+    "metabolism/rocket-installer": "1.0.*"
   },
   "require-dev": {
     "composer/composer": "1.0.*@dev",
