@@ -4,9 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## 1.2.0 - in dev
+## 1.2.1 - 2017-09-04
 ### Changed
-- Traits folder
+- Rocket installer 1.1.0
+
+## 1.2.0 - 2017-07-15
+### Changed
+- Rocket installer 1.0.0
 
 ## 1.1.6 - 2013-06-06
 ### Changed
