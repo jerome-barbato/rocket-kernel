@@ -22,7 +22,7 @@ class Parser
         $this->io    = $io;
         $this->data  = [];
         $this->paths = [
-            'builder' => 'app/config/builder.yml',
+            'builder' => 'config/builder.yml',
             'web' =>  __DIR__.'/../../web'
         ];
 
@@ -31,8 +31,8 @@ class Parser
             $builder = \Spyc::YAMLLoad($this->paths['builder']);
             $config = new DotAccessData($builder);
 
-            $this->paths['asset'] = trim($config->get('paths.asset', '/src/FrontBundle/Resources/private'), '/');
-            $this->paths['public'] = trim($config->get('paths.public', '/src/FrontBundle/Resources/public'), '/');
+            $this->paths['src'] = trim($config->get('paths.src', '/src/FrontBundle/Resources/src'), '/');
+            $this->paths['dist'] = trim($config->get('paths.dist', '/src/FrontBundle/Resources/dist'), '/');
         }
         else
         {
@@ -59,9 +59,9 @@ class Parser
     {
         $data = [];
 
-        $public_path = $this->paths['public'].'/css';
+        $bundle_path = $this->paths['dist'].'/bundle';
 
-        $variables = $this->find([$this->paths['asset'].'/config/env.scss', $this->paths['asset'].'/config/var.scss'], '/\$(.*?)\s*?:\s*?(.*?)\s*?;/sm');
+        $variables = $this->find([$this->paths['src'].'/config/*.scss'], '/\$(.*?)\s*?:\s*?(.*?)\s*?;/sm');
 
         foreach($variables as $name=>$value)
         {
@@ -97,53 +97,57 @@ class Parser
                 $data['breakpoints'][str_replace('screen-', '', $name)] = $value;
         }
 
-        $data['text'] = $this->find([$public_path.'/screen.css'], '/.text--([a-zA-Z0-9-_]*)/');
-        $data['button'] = $this->find([$public_path.'/screen.css'], '/.button--([a-zA-Z0-9-_]*)/');
+        $data['text'] = $this->find([$bundle_path.'/*.css'], '/.text--([a-zA-Z0-9-_]*)/');
+        $data['button'] = $this->find([$bundle_path.'/*.css'], '/.button--([a-zA-Z0-9-_]*)/');
 
         return $data;
     }
 
 
-    private function find($files, $pattern)
+    private function find($files_patterns, $pattern)
     {
         $raw_data = [[],[]];
         $data = [];
 
-        foreach ($files as $file)
+        foreach ($files_patterns as $files_pattern)
         {
-            if( file_exists($file) )
-            {
-                $content = file_get_contents($file);
-                preg_match_all($pattern, $content, $_data);
+        	$files = glob($files_pattern);
+	        foreach ($files as $file)
+	        {
+		        if( file_exists($file) )
+		        {
+			        $content = file_get_contents($file);
+			        preg_match_all($pattern, $content, $_data);
 
-                if( count($_data) >= 3 )
-                {
-                    $raw_data[0] = array_merge($raw_data[0],$_data[1]);
-                    $raw_data[1] = array_merge($raw_data[1],$_data[2]);
-                }
-                elseif( count($_data) >= 2 )
-                {
-                    $raw_data[0] = array_merge($raw_data[0],$_data[1]);
-                }
-            }
-            else
-            {
-                $this->io->writeError('<warning>'.$file.' not found</warning>');
-            }
+			        if( count($_data) >= 3 )
+			        {
+				        $raw_data[0] = array_merge($raw_data[0],$_data[1]);
+				        $raw_data[1] = array_merge($raw_data[1],$_data[2]);
+			        }
+			        elseif( count($_data) >= 2 )
+			        {
+				        $raw_data[0] = array_merge($raw_data[0],$_data[1]);
+			        }
+		        }
+		        else
+		        {
+			        $this->io->writeError('<warning>'.$file.' not found</warning>');
+		        }
 
-            if( !empty($raw_data[1]) )
-            {
-                $i = 0;
-                foreach ($raw_data[0] as $key)
-                {
-                    $data[$key] = $raw_data[1][$i];
-                    $i++;
-                }
-            }
-            else
-            {
-                $data = array_values(array_unique($raw_data[0]));
-            }
+		        if( !empty($raw_data[1]) )
+		        {
+			        $i = 0;
+			        foreach ($raw_data[0] as $key)
+			        {
+				        $data[$key] = $raw_data[1][$i];
+				        $i++;
+			        }
+		        }
+		        else
+		        {
+			        $data = array_values(array_unique($raw_data[0]));
+		        }
+	        }
         }
 
         return $data;

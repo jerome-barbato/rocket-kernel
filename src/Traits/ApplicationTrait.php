@@ -37,11 +37,10 @@ trait ApplicationTrait {
 	 */
 	public function getPaths()
 	{
-
 		$this->paths = [
-			'config'    => BASE_URI . '/app/config',
-			'status'    => BASE_URI . '/app/status.yml',
-			'views'     => BASE_URI . '/app/views'
+			'config'    => BASE_URI . '/config',
+			'status'    => BASE_URI . '/config/status.yml',
+			'views'     => BASE_URI . '/src/FrontBundle/Views'
 		];
 
 		return $this->paths;
