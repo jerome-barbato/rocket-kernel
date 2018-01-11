@@ -1,0 +1,291 @@
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, maximum-scale=1, minimum-scale=1, initial-scale=1">
+
+  <title>Sitemap</title>
+  
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+  <style type="text/css">
+    {{ style }}
+    #sitemap {
+      display: none;
+    }
+    body {
+      padding-left: 0; font-family: 'Open Sans', sans-serif; overflow: auto;
+    }
+    div.orgChart {
+      padding : 20px; margin-top: 40px;
+    }
+    div.orgChart h2 {
+      font-weight: normal; border-bottom: none; font-size: 12px;
+      margin: 0; display: table; height: 100%; width: 100%;
+    }
+    div.orgChart div.hasChildren h2{
+      font-size: 13px
+    }
+    div.orgChart a:first-letter {
+      text-transform: capitalize;
+    }
+    div.orgChart a {
+      text-decoration: none; color: inherit; display: table-cell; vertical-align: middle;
+    }
+    div.orgChart ul {
+      font-size: 0.8em; list-style: none; margin: 4px; padding: 0; text-align: left;
+    }
+    div.orgChart ul.stack, div.orgChart ul.stack ul {
+      text-align: center;
+    }
+    div.orgChart table {
+      width: 100%;
+    }
+    div.orgChart tr.lines td.line {
+      height: 20px; width: 1px;
+    }
+    div.orgChart tr.lines td.top {
+      border-top: 1px solid #bbb;
+    }
+    div.orgChart tr.lines td.left {
+      border-right: 1px solid transparent;
+    }
+    div.orgChart tr.lines td.right {
+      border-left: 1px solid #bbb;
+    }
+    div.orgChart td {
+      padding: 0 2px; text-align: center; vertical-align: top;
+    }
+    div.orgChart div.node {
+      border-radius: 3px; position: relative;
+      cursor: default; display: inline-block; height: 55px;
+      line-height: 1em; padding: 0 5px; width: 90px;
+      background-color: #7c939d; color: #fff; box-shadow: 0 2px 0 rgba(0,0,0,0.1);
+    }
+
+    div.orgChart div.node.added:after, div.orgChart div.node.deleted:after , div.orgChart div.node.not-visited:after {
+      position: absolute; right: 4px; top: -8px; font-size: 10px; z-index: 1; background: #fff;
+      padding: 0 4px; border-radius: 3px; color: #57656b; box-shadow: 0 2px 0 rgba(0,0,0,0.1);
+    }
+
+    div.orgChart div.node.not-visited:after { content: 'Not seen' }
+    div.orgChart div.node.added:after { content: 'New' }
+    div.orgChart div.node.deleted:after { content: 'Removed' }
+    div.orgChart div.node.deleted { background-color: #9d7c7c }
+    div.orgChart div.node.added { background-color: #7c9d83 }
+
+    div.orgChart div.hasChildren {
+      background-color: #dfdfdf; color: #666; box-shadow: 0 2px 0 #dfdfdf;
+    }
+    div.orgChart div.hasChildren h2 {
+      font-weight: 600;
+    }
+    div.orgChart.interactive div.hasChildren {
+      cursor: pointer;
+    }
+    div.orgChart div.node.hover {
+      background-color: white;
+    }
+    div.orgChart div.adjunct.node {
+      background-color: #efefef; height: 40px; margin-left: -110px;
+      margin-top: 8px; position: absolute; width: 80px;
+    }
+    div.orgChart div.adjunct-link {
+      border: 1px dashed #333; display: inline-block; margin-left: -20px;
+      margin-top: 25px; position: absolute; width: 20px;
+    }
+    .valign {
+      display: table; height: 100%;
+    }
+    .valign__middle {
+      display: table-cell; vertical-align: middle
+    }
+    #last_update{ position: fixed; left: 10px; bottom: 10px; font-size: 10px }
+    .open_all_links{
+      position: fixed; right: 10px; bottom: 10px; z-index: 99;
+    }
+    .open_all{
+      background-color: #7c939d; width: 40px; height: 40px; padding: 0; margin-left: 8px; display: inline-block; position: relative;
+      color: #fff; box-shadow: 0 2px 0 rgba(0,0,0,0.1); border-radius: 50%; font-size: 26px; cursor: pointer; line-height: 100%;
+    }
+    .open_all:before{ position: absolute; left: 0; width: 100%; text-align: center; top: 50%; margin-top: -0.5em }
+    .open_all.fa-external-link{ font-size: 17px }
+
+    @media screen and (max-width: 1024px){
+      .open_all.fa-mobile, .open_all.fa-tablet{ display: none }
+    }
+
+    @media screen and (max-width: 768px)
+    {
+      #last_update{ top: 10px; right: 10px; left: auto; bottom: auto }
+      #sitemap{ display: block; margin-top: 30px; font-size: 15px }
+      #chart{ display: none }
+      ul{ font-family: 'Open Sans', sans-serif; padding-left: 20px; list-style: none }
+      li.deleted a{ color:#bb5151; text-decoration: line-through }
+      li.deleted a:before{ content: 'Deleted : ' }
+      li.new a{ color:#4aad5f }
+      li.new a:before{ content: 'New : ' }
+      a:first-letter { text-transform: capitalize }
+      a{ color: #666; display: inline-block; padding: 8px 0; font-size: 13px }
+      a[href]{ color: #7c939d; font-size: 12px }
+    }
+  </style>
+  
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery-orgchart/1.0.0/jquery.orgchart.min.js"></script>
+  <script type="text/javascript" src="https://rawgit.com/kawanet/msgpack-lite/master/dist/msgpack.min.js"></script>
+</head>
+<body>
+
+<ul id="sitemap">
+  <li>
+    <a>Sitemap</a>
+    <ul></ul>
+  </li>
+</ul>
+
+<div id="chart"></div>
+<div id="last_update">Last update : {{ last_update|date('F jS \\a\\t g:ia', 'Europe/Paris') }}</div>
+
+<div class="open_all_links">
+  <a class="open_all fa fa-external-link" title="Open all pages"></a>
+  <a class="open_all fa fa-mobile" data-device="phone" title="Preview all pages on phone"></a>
+  <a class="open_all fa fa-tablet" data-device="tablet" title="Preview all pages on tablet"></a>
+</div>
+
+<script type="text/javascript">
+
+	var base_url = '{{ base_url }}';
+
+	function generate(sitemap)
+    {
+    	var html = "";
+
+    	if( typeof sitemap == "object")
+    	{
+            $.each(sitemap, function (id, route)
+            {
+            	if( 'id' in route )
+            	{
+		            html += '<li class="'+route.status+'">' +
+                              ( route.status == "deleted" ? '<a>' : '<a target="_blank" href="'+base_url+route.path+'">' ) +
+                              String(route.id).replace(/-/g, ' ').replace(/_/g, ' ')  +
+                              '</a>' +
+			                '</li>';
+                }
+                else
+                {
+		            html += '<li>' +
+			                  '<a>' + String(id).replace(/-/g, ' ').replace(/_/g, ' ') + '</a>' +
+			                  '<ul>' +
+			                    generate(route) +
+			                  '</ul>' +
+			                '</li>';
+                }
+		    });
+	    }
+
+    	return html;
+    }
+
+
+    function compare(objects, old_objects, new_objects)
+    {
+        $.each(objects, function(id, object)
+        {
+        	if( 'id' in object )
+            {
+	            object.status = "unchanged";
+
+                if( new_objects == false )
+	                object.status = "deleted";
+
+                if( old_objects == false )
+	                object.status = "added";
+            }
+            else
+            {
+	            var old_object = typeof old_objects == "object" ? ( id in old_objects ? old_objects[id] : false ) : false;
+	            var new_object = typeof old_objects == "object" ? ( id in new_objects ? new_objects[id] : false ) : false;
+
+	            compare(object, old_object, new_object);
+            }
+        });
+    }
+
+    // get previous sitemap and seen pages
+    var previous_sitemap = localStorage.getItem('sitemap');
+    var seen_pages = $.cookie('sitemap_seen_pages');
+    seen_pages = seen_pages ? JSON.parse(seen_pages) : [];
+
+    // store current sitemap
+    var current_sitemap = {{ sitemap|json_encode|raw }};
+	localStorage.setItem('sitemap', JSON.stringify(current_sitemap));
+
+    var merged_sitemap = current_sitemap;
+
+    // compare sitemap
+    if( previous_sitemap )
+    {
+	    previous_sitemap = JSON.parse(previous_sitemap);
+	    merged_sitemap = $.extend(true,{}, previous_sitemap, current_sitemap);
+
+	    compare(merged_sitemap, previous_sitemap, current_sitemap);
+    }
+    
+    // generate list
+    $('#sitemap ul').html( generate(merged_sitemap) );
+
+    // generate chart
+    $("#sitemap").orgChart({container: $("#chart")});
+
+
+    // Handle page view
+    var $links = $('a[href]');
+
+    $links.off('click').click(function()
+    {
+        var url = $(this).attr('href').replace(base_url,'');
+
+        if( seen_pages.indexOf( url ) == -1 )
+        {
+            seen_pages.push( $(this).attr('href').replace(base_url, '') );
+            $.cookie('sitemap_seen_pages', JSON.stringify(seen_pages), { expires: 365 });
+
+            $(this).closest('.node').removeClass('not-visited');
+        }
+    });
+
+    // Add not visited class
+    $links.each(function()
+    {
+        var url = $(this).attr('href').replace(base_url,'');
+
+        if( seen_pages.indexOf( url ) == -1 )
+            $(this).closest('.node').addClass('not-visited');
+    });
+
+    // Handle open all button
+    $('.open_all').click(function()
+    {
+        var $links = $('#chart').find('a[href]');
+        var $handler = $(this);
+
+        if( confirm('This will open '+$links.length+' pages, are you sure ?') ){
+
+            $links.each(function()
+            {
+                $(this).click();
+
+                var url = $(this).attr('href');
+
+                if( typeof $handler.data('device') != 'undefined' )
+                    url = base_url+'/preview/'+$handler.data('device')+'/'+window.btoa(encodeURIComponent( url.replace(base_url,'/') ));
+
+                window.open( url );
+            });
+        }
+    });
+</script>
+</body>
+</html>

@@ -4,10 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.3.1 - IN DEV
+### Added
+* debug views
+* manifest loader
+
 ## 1.3.0 - 2018-01-01
 ### Changed
-- Updated default path
-- styleguide generation detection
+* Updated default path
+* styleguide generation detection
 
 ## 1.2.1 - 2017-09-04
 ### Changed

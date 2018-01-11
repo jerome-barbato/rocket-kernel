@@ -1,0 +1,4 @@
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^([^\.]+).html$ $1.json [NC,L]
+RewriteRule ^([^\.]+)$ $1.html [NC,L]

@@ -1,0 +1,114 @@
+{% if config.debug_bar|default() %}
+	<div class="Debug-bar Debug-bar--{{ config.debug_bar.theme|default('dark') }}">
+		<link href="https://fonts.googleapis.com/css?family=Open+Sans:600" rel="stylesheet">
+		<style type="text/css">
+			.Debug-bar {
+				font-family: 'Open Sans', sans-serif; position: fixed; padding: 80px 20px; top: 50%; background-color: #2b2e34;
+				transform: translateY(-50%) translateX(-200px); color: #fff; border-radius: 0 8px 8px 0; z-index: 99999;
+				width: 220px; text-transform: uppercase; box-sizing: border-box; transition: 0.3s cubic-bezier(0.645, 0.045, 0.355, 1.000);
+			}
+			.Debug-bar:hover { transform: translateY(-50%) }
+			.Debug-bar__icon { position: absolute; width: 8px; height: 1px; top: 50%; right: 8px; margin-top: -5px; transition: 0.3s cubic-bezier(0.645, 0.045, 0.355, 1.000); opacity: 0.7 }
+			.Debug-bar:hover .Debug-bar__icon { opacity: 0 }
+			.Debug-bar__icon:before, .Debug-bar__icon:after { content: ''; position: absolute; width: 100%; height: 100% }
+			.Debug-bar__icon, .Debug-bar__icon:before, .Debug-bar__icon:after { background-color: #fff }
+			.Debug-bar__icon:before { top: -500% }
+			.Debug-bar__icon:after { top: 500% }
+			.Debug-bar__title, .Debug-bar__link { font-size: 10px; letter-spacing: 0.4em }
+			.Debug-bar__block + .Debug-bar__block { margin-top: 40px }
+			.Debug-bar__title { opacity: 0.4 }
+			.Debug-bar__text { font-size: 16px; font-weight: 700; margin-top: 5px; letter-spacing: 0.2em }
+			.Debug-bar__link { display: block; position: relative; cursor: pointer }
+			.Debug-bar__link[href] { transition: color 0.2s cubic-bezier(0.645, 0.045, 0.355, 1.000) }
+			.Debug-bar__link[href]:hover { color:#6bb559 }
+			.Debug-bar__block + .Debug-bar__link { margin-top: 80px }
+			.Debug-bar__link + .Debug-bar__link { margin-top: 20px }
+			.Debug-bar__link--toggle { padding-left: 40px }
+			.Debug-bar__link--toggle:before, .Debug-bar__link--toggle:after { content: ''; position: absolute }
+			body.has-debug [data-function="debug"]:after { left: 16px; background-color: #6bb559 }
+			body.has-livereload [data-function="livereload"]:after { left: 16px; background-color: #6bb559 }
+			.Debug-bar__link--toggle:before { height: 8px; width: 30px; background-color: #fff; left: 0; bottom: 0; border-radius: 5px; opacity: 0.2 }
+			.Debug-bar__link--toggle:after { width: 14px; height: 14px; background-color: #fff; left: 0; border-radius: 100%; top: -1px; transition: 0.2s cubic-bezier(0.645, 0.045, 0.355, 1.000) }
+			body.has-debug *:hover{ outline: 1px dotted rgba(255,0,0,0.5) }
+			body.has-debug .Debug-bar:hover, body.has-debug .Debug-bar *:hover{ outline: none }
+		</style>
+
+		<div class="Debug-bar__icon"></div>
+
+		{% if page_status|default() %}
+			<div class="Debug-bar__block">
+				<div class="Debug-bar__title">Page status</div>
+				<div class="Debug-bar__text">{{ page_status }}</div>
+			</div>
+		{% endif %}
+
+		<div class="Debug-bar__block">
+			<div class="Debug-bar__title">Environment</div>
+			<div class="Debug-bar__text">{{ environment }}</div>
+		</div>
+
+		<div class="Debug-bar__block">
+			<div class="Debug-bar__title">Last update</div>
+			<div class="Debug-bar__text">{{ last_update|date('m.d.y / H:i', 'Europe/Paris') }}</div>
+		</div>
+
+		<a class="Debug-bar__link" href="{{ base_url }}/styleguide.html" target="_blank">Styleguide</a>
+		<a class="Debug-bar__link" href="{{ base_url }}/sitemap" target="_blank">Sitemap</a>
+		{%  if config.export|default() %}
+			<a class="Debug-bar__link" href="{{ base_url }}/vulcanize" target="_blank" title="Export website as HTML">Vulcanize</a>
+		{% endif %}
+		<a class="Debug-bar__link Debug-bar__link--toggle" id="_debug" data-function="debug">Debug</a>
+		{% if environment == 'local' %}
+			<a class="Debug-bar__link Debug-bar__link--toggle" id="_livereload" data-function="livereload">Livereload</a>
+		{% endif %}
+
+		<script type="text/javascript">
+			function setDebugCookie(cname, cvalue, exdays) { var d = new Date(); d.setTime(d.getTime() + (exdays*24*60*60*1000)); var expires = "expires="+ d.toUTCString(); document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/"; }
+			function getDebugCookie(cname) { var name = cname + "="; var decodedCookie = decodeURIComponent(document.cookie); var ca = decodedCookie.split(';'); for(var i = 0; i <ca.length; i++) { var c = ca[i]; while (c.charAt(0) == ' ') { c = c.substring(1); } if (c.indexOf(name) == 0) { return c.substring(name.length, c.length); } } return ""; }
+
+			document.getElementById("_debug").onclick = function(){
+				document.body.classList.toggle('has-debug');
+				setDebugCookie('debug-mode', document.body.className.indexOf('has-debug') !== -1 );
+			};
+
+			document.getElementById("_livereload").onclick = function(){
+				document.body.classList.toggle('has-livereload');
+				setDebugCookie('livereload', document.body.className.indexOf('has-livereload') !== -1);
+				location.reload();
+			};
+
+			if( getDebugCookie('debug-mode') === 'true' )
+				document.body.classList.add('has-livereload');
+
+			if( getDebugCookie('livereload') === 'true' )
+				document.body.classList.add('has-livereload');
+		</script>
+	</div>
+{% endif %}
+
+
+{% if config.debug_bar.grid|default() %}
+	<div class="Debug-grid">
+		<style type="text/css">
+			.Debug-grid{
+				position: fixed; left: 0; top: 0; width: 100%; height: 100%; display: none;
+				pointer-events: none; margin-top: 0!important; z-index: 99999;
+			}
+			body.has-debug .Debug-grid{ display: block }
+			.Debug-grid .container div{ height: 100%; border-left: 1px solid rgba(74,255,255,0.4); flex: 1; display: block }
+			{% if config.debug_bar.grid.gap|default() %}
+			    .Debug-grid .container div{ padding: 0 {{ config.debug_bar.grid.gap }} }
+			{% endif %}
+			.Debug-grid .container span{ height: 100%; display: block; background: rgba(255,100,100,0.05) }
+			.Debug-grid .container div:last-of-type{ border-right: 1px solid rgba(74,255,255,0.41) }
+			.Debug-grid .container{ height: 100%; display: flex }
+		</style>
+		<div class="container">
+			{% for col in 1..config.debug_bar.grid.columns|default(config.debug_bar.grid) %}<div><span>&nbsp;</span></div>{% endfor %}
+		</div>
+	</div>
+{% endif %}
+
+{% if cookies.livereload|default() %}
+	<script type="text/javascript" src="{{ host }}:35729/livereload.js"></script>
+{% endif %}

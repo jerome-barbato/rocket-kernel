@@ -1,0 +1,78 @@
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, maximum-scale=1, minimum-scale=1, initial-scale=1">
+
+    <title>Preview : {{ device }}</title>
+
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:400" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+    <style type="text/css">
+        {{ style }}
+        body{ font-family: 'Open Sans', sans-serif; padding-left: 0 }
+        table{ height: 100%; width: 100%; text-align: center }
+        iframe{ border: 0; border-bottom: 20px solid #ddd; border-top: 10px solid #ddd; box-shadow: 0 0 0 5px #ddd; border-radius: 1px; resize: both; width: 100% }
+        .sizers{ border-radius: 1px;  box-shadow: 0 0 0 5px #ddd; background: #ddd; margin: auto; margin-top: 2px; text-align: center; line-height: 50%; height: auto }
+        .emulator{ margin: auto }
+        .phone{ width: 320px }
+        .phone[data-size="m"]{ width: 375px }
+        /*.phone[data-size="m"] iframe{ height: 667px }*/
+        .phone[data-size="l"]{ width: 425px }
+        /*.phone[data-size="l"] iframe{ height: 808px }*/
+        .phone iframe{ height: 568px }
+        .tablet{ width: 768px }
+        .tablet[data-size="landscape"]{ width: 1024px }
+        .tablet[data-size="landscape"] iframe{ height: 768px }
+        .tablet iframe{ height: 1024px }
+        .sizer{ display: block; font-size: 10px; text-align: center; border-radius: 5px; cursor: pointer; padding: 5px 0 }
+        .sizer.active{ font-weight: bold; background: #eee }
+
+        .open{
+            background-color: #7c939d; width: 40px; height: 40px; padding: 0; margin-left: 8px; display: inline-block;
+            color: #fff; box-shadow: 0 2px 0 rgba(0,0,0,0.1); border-radius: 50%; font-size: 17px; cursor: pointer; line-height: 100%;
+            position: fixed; right: 10px; bottom: 10px; z-index: 99;
+        }
+        .open:before{ position: absolute; left: 0; width: 100%; text-align: center; top: 50%; margin-top: -0.5em }
+    </style>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+</head>
+<body>
+<table>
+    <tr>
+        <td>
+            <div class="{{ device }} device emulator">
+                <iframe src="{{ base_url ~ preview_path }}"></iframe>
+            </div>
+            <table class="{{ device }} device sizers">
+                <tr>
+                    {% if device == "phone" %}
+                        <td><a class="sizer active" data-size="s">S</a></td>
+                        <td><a class="sizer" data-size="m">M</a></td>
+                        <td><a class="sizer" data-size="l">L</a></td>
+                    {% elseif device == "tablet" %}
+                        <td><a class="sizer active" data-size="portrait">Portrait</a></td>
+                        <td><a class="sizer" data-size="landscape">Landscape</a></td>
+                    {% endif %}
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+
+<a class="open fa fa-external-link" title="Open page" href="{{ base_url ~ preview_path }}" target="_blank"></a>
+
+<script type="text/javascript">
+
+    var $device = $('.device');
+    var $sizers = $('.sizer');
+
+    $sizers.click(function(){
+
+        $sizers.removeClass('active');
+        $(this).addClass('active');
+
+        $device.attr('data-size', $(this).data('size') );
+    });
+</script>
+</body>
+</html>
