@@ -71,16 +71,18 @@
 				setDebugCookie('debug-mode', document.body.className.indexOf('has-debug') !== -1 );
 			};
 
+            {% if environment == 'local' %}
 			document.getElementById("_livereload").onclick = function(){
 				document.body.classList.toggle('has-livereload');
 				setDebugCookie('livereload', document.body.className.indexOf('has-livereload') !== -1);
 				location.reload();
 			};
 
-			if( getDebugCookie('debug-mode') === 'true' )
-				document.body.classList.add('has-livereload');
-
 			if( getDebugCookie('livereload') === 'true' )
+				document.body.classList.add('has-livereload');
+            {% endif %}
+
+			if( getDebugCookie('debug-mode') === 'true' )
 				document.body.classList.add('has-livereload');
 		</script>
 	</div>
