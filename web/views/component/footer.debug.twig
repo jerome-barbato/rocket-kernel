@@ -111,6 +111,6 @@
 	</div>
 {% endif %}
 
-{% if cookies.livereload|default() %}
+{% if environment == 'local' and cookies.livereload|default() %}
 	<script type="text/javascript" src="{{ host }}:35729/livereload.js"></script>
 {% endif %}
