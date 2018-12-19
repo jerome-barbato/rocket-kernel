@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# MIT © Metabolism - www.metabolism.fr
+
+# git hook to run a command after `git pull` if a specified file was changed
+if ! grep -q "merge ours" ".git/config"; then
+    git config merge.ours.driver true
+fi
+composer update
